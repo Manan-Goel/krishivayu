@@ -132,7 +132,6 @@ Runs the 4 verified unit and integration test suites:
 
 ## Attributions & Licenses
 
-- **Base Project Fork**: Forked and restructured from [`munish0838/parali`](https://github.com/munish0838/parali). The heavy Sentinel-2/ONNX offline VLM stack was pruned in favor of a lean, reliable Vercel-ready architecture.
 - **NASA FIRMS**: Satellite active fire detections courtesy of NASA EOSDIS FIRMS.
 - **Weather Data**: Open-Meteo keyless weather API under CC-BY 4.0.
 - **Historical Data**: ICAR-IARI Consortium for Research on Agroecosystem Monitoring and Modeling from Space (CREAMS).

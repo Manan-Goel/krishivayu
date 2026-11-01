@@ -28,10 +28,14 @@ assert.throws(() => validatePhone('98765'), /Invalid Indian mobile phone number/
 assert.throws(() => validatePhone('abcdefghij'), /Invalid Indian mobile phone number/);
 console.log('✓ Phone number normalization and boundary checks passed.');
 
-// 2. Quantity validation
+// 2. Quantity & Price validation
 assert.strictEqual(validateQuantity(1), 1);
 assert.strictEqual(validateQuantity('250.55'), 250.6);
 assert.strictEqual(validateQuantity(50000), 50000);
+
+assert.strictEqual(validatePrice('210'), 210);
+assert.strictEqual(validatePrice(undefined), undefined);
+assert.throws(() => validatePrice(0), /positive number/);
 
 assert.throws(() => validateQuantity(0), /at least 1 quintal/);
 assert.throws(() => validateQuantity(-10), /at least 1 quintal/);

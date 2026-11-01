@@ -1,7 +1,6 @@
 export type MarketLang = 'en' | 'hi' | 'pa';
 
 export interface MarketDictionary {
-  badgeDisclaimer: string;
   demoNotice: string;
   step1Title: string;
   step1Desc: string;
@@ -40,7 +39,6 @@ export interface MarketDictionary {
 
 export const marketDict: Record<MarketLang, MarketDictionary> = {
   en: {
-    badgeDisclaimer: 'This site connects farmers and buyers. It does not handle payment or guarantee a sale. Settle directly.',
     demoNotice: 'Demo Environment · All buyer offers shown are synthetic simulations',
     step1Title: 'Step 1: Farm Location',
     step1Desc: 'Where is the paddy straw located?',
@@ -77,7 +75,6 @@ export const marketDict: Record<MarketLang, MarketDictionary> = {
     viewDetails: 'View Details',
   },
   hi: {
-    badgeDisclaimer: 'यह पोर्टल किसानों और खरीदारों को जोड़ता है। यह भुगतान या गारंटी नहीं लेता। सीधे लेनदेन करें।',
     demoNotice: 'डेमो पोर्टल · सभी खरीदार प्रस्ताव सिमुलेशन (डेमो) हैं',
     step1Title: 'चरण 1: खेत का स्थान',
     step1Desc: 'आपकी पराली किस गांव और जिले में है?',
@@ -114,7 +111,6 @@ export const marketDict: Record<MarketLang, MarketDictionary> = {
     viewDetails: 'विवरण देखें',
   },
   pa: {
-    badgeDisclaimer: 'ਇਹ ਪੋਰਟਲ ਕਿਸਾਨਾਂ ਅਤੇ ਖਰੀਦਦਾਰਾਂ ਨੂੰ ਜੋੜਦਾ ਹੈ। ਇਹ ਭੁਗਤਾਨ ਜਾਂ ਵਿਕਰੀ ਦੀ ਗਰੰਟੀ ਨਹੀਂ ਦਿੰਦਾ। ਆਪਸੀ ਸਿੱਧਾ ਲੈਣ-ਦੇਣ ਕਰੋ।',
     demoNotice: 'ਡੈਮੋ ਪੋਰਟਲ · ਦਿਖਾਏ ਗਏ ਸਾਰੇ ਖਰੀਦਦਾਰ ਆਫਰ ਡੈਮੋ ਸਿਮੂਲੇਸ਼ਨ ਹਨ',
     step1Title: 'ਪੜਾਅ 1: ਖੇਤ ਦਾ ਟਿਕਾਣਾ',
     step1Desc: 'ਤੁਹਾਡੀ ਪਰਾਲੀ ਕਿਹੜੇ ਪਿੰਡ ਅਤੇ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਹੈ?',

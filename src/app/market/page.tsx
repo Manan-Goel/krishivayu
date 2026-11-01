@@ -11,7 +11,6 @@ import {
   PlusCircle,
   Truck,
   ShieldAlert,
-  HelpCircle,
   Clock,
   Send,
 } from 'lucide-react';
@@ -204,11 +203,6 @@ export default function MarketBrowsePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Banner (Mandatory Product Rule) */}
-      <div className="bg-amber-950/80 border-b border-amber-500/30 px-4 py-2 text-xs text-amber-200 text-center font-medium flex items-center justify-center gap-2">
-        <HelpCircle className="w-4 h-4 shrink-0 text-amber-400" />
-        <span>This site connects farmers and buyers. It does not handle payment or guarantee a sale. Settle directly.</span>
-      </div>
 
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-20 px-4 py-3 flex flex-wrap items-center justify-between gap-3">

@@ -54,7 +54,7 @@ export function MarketMap({
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [75.5, 30.6], // Punjab center
       zoom: 7.2,
       minZoom: 6,
@@ -63,7 +63,15 @@ export function MarketMap({
     });
 
     mapRef.current = map;
+
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+    map.addControl(
+      new maplibregl.AttributionControl({
+        compact: true,
+        customAttribution: '© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }),
+      'bottom-left'
+    );
 
     return () => {
       map.remove();
@@ -71,43 +79,54 @@ export function MarketMap({
     };
   }, []);
 
-  // Update Markers on listings change
+  // Update listing markers
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Clear existing markers
+    // Clear old markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
+    // Create a marker per listing
     listings.forEach((listing) => {
-      const coords = DISTRICT_COORDS[listing.district] || [75.5, 30.5];
-      // Jitter slightly based on listing id hash to avoid perfect overlap of multiple listings in same district
-      const hash = listing.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      const coords = DISTRICT_COORDS[listing.district] || [75.5, 30.6];
+      // Jitter slightly so overlapping pins in same district spread out
+      const hash = (listing.id || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
       const jitterLat = ((hash % 10) - 5) * 0.015;
       const jitterLon = (((hash >> 2) % 10) - 5) * 0.015;
-      const pos: [number, number] = [coords[0] + jitterLon, coords[1] + jitterLat];
 
       const isSelected = selectedListing?.id === listing.id;
 
-      // Custom marker DOM element
+      // Pin DOM Element
       const el = document.createElement('div');
-      el.className = `cursor-pointer transition-transform duration-200 ${
-        isSelected ? 'scale-125 z-30' : 'hover:scale-110 z-10'
-      }`;
-
-      const colorClass =
-        listing.status === 'accepted'
-          ? 'bg-amber-500 border-amber-300'
-          : listing.status === 'collected'
-          ? 'bg-slate-500 border-slate-300'
-          : 'bg-emerald-500 border-emerald-300';
-
+      el.className = 'group cursor-pointer flex flex-col items-center';
       el.innerHTML = `
-        <div class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold text-white shadow-lg border-2 ${colorClass}">
-          <span>🌾</span>
+        <div style="
+          background-color: ${isSelected ? '#1F3A5F' : '#2E7D32'};
+          color: white;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          border-radius: 9999px;
+          padding: 2px 7px;
+          font-size: 11px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          transition: transform 0.15s ease;
+          transform: ${isSelected ? 'scale(1.15)' : 'scale(1)'};
+        ">
+          <span>📦</span>
           <span>${listing.quantityQuintals} Q</span>
         </div>
+        <div style="
+          width: 0; 
+          height: 0; 
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 5px solid ${isSelected ? '#1F3A5F' : '#2E7D32'};
+        "></div>
       `;
 
       el.addEventListener('click', () => {
@@ -115,39 +134,31 @@ export function MarketMap({
       });
 
       const marker = new maplibregl.Marker({ element: el })
-        .setLngLat(pos)
+        .setLngLat([coords[0] + jitterLon, coords[1] + jitterLat])
         .addTo(map);
 
       markersRef.current.push(marker);
     });
   }, [listings, selectedListing, onSelectListing]);
 
-  // Pan to selected listing
+  // Fly to selected listing
   useEffect(() => {
-    if (!mapRef.current || !selectedListing) return;
+    const map = mapRef.current;
+    if (!map || !selectedListing) return;
+
     const coords = DISTRICT_COORDS[selectedListing.district];
     if (coords) {
-      mapRef.current.flyTo({
+      map.flyTo({
         center: coords,
         zoom: 9.5,
-        speed: 1.2,
+        duration: 800,
       });
     }
   }, [selectedListing]);
 
   return (
-    <div className="relative w-full h-full min-h-[350px] rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
+    <div className="relative w-full h-full min-h-[420px] bg-[#F5F7FA]">
       <div ref={mapContainerRef} className="w-full h-full" />
-      <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-2 text-xs flex items-center gap-3 z-10">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-          <span className="text-slate-300">Open Listing</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          <span className="text-slate-300">Accepted</span>
-        </div>
-      </div>
     </div>
   );
 }

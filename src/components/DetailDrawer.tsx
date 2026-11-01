@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { DistrictSummary } from '@/types';
 import { generateFarmerMessages } from '@/lib/messages';
+import { getRiskBadgeClasses } from '@/lib/theme';
 import {
   X,
   Copy,
@@ -13,8 +14,7 @@ import {
   Flame,
   Truck,
   Wrench,
-  AlertTriangle,
-  Sparkles,
+  Info,
 } from 'lucide-react';
 
 interface DetailDrawerProps {
@@ -25,6 +25,7 @@ interface DetailDrawerProps {
 export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
   const [selectedLang, setSelectedLang] = useState<'en' | 'hi' | 'pa'>('en');
   const [copied, setCopied] = useState(false);
+  const [showFormulaInfo, setShowFormulaInfo] = useState(false);
 
   // Close on ESC
   useEffect(() => {
@@ -50,31 +51,18 @@ export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
     }
   };
 
-  const getRiskBadgeColor = (level: string) => {
-    switch (level) {
-      case 'critical':
-        return 'bg-red-500/20 text-red-400 border-red-500/40';
-      case 'high':
-        return 'bg-orange-500/20 text-orange-400 border-orange-500/40';
-      case 'moderate':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40';
-      default:
-        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-    }
-  };
-
   const getAlternativeIcon = (type: string) => {
     switch (type) {
       case 'cbg_plant':
-        return <Factory className="w-4 h-4 text-emerald-400" />;
+        return <Factory className="w-4 h-4 text-[#2E7D32]" />;
       case 'biomass_plant':
-        return <Flame className="w-4 h-4 text-orange-400" />;
+        return <Flame className="w-4 h-4 text-[#E65100]" />;
       case 'residue_buyer':
-        return <Truck className="w-4 h-4 text-cyan-400" />;
+        return <Truck className="w-4 h-4 text-[#1F3A5F]" />;
       case 'machinery_rental':
-        return <Wrench className="w-4 h-4 text-purple-400" />;
+        return <Wrench className="w-4 h-4 text-purple-700" />;
       default:
-        return <Factory className="w-4 h-4 text-gray-400" />;
+        return <Factory className="w-4 h-4 text-[#5B6675]" />;
     }
   };
 
@@ -94,290 +82,219 @@ export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150">
       {/* Click outside to close */}
       <div className="flex-1 cursor-pointer" onClick={onClose} aria-hidden="true" />
 
-      {/* Drawer Container */}
-      <aside
-        className="w-full max-w-xl bg-[#03091e] border-l border-white/10 text-white flex flex-col h-full shadow-2xl overflow-y-auto focus:outline-none"
+      {/* Drawer Panel */}
+      <div
         role="dialog"
-        aria-label={`Action plan for District ${district.name}`}
+        aria-labelledby="drawer-title"
+        className="w-full max-w-lg bg-white border-l border-[#D9DEE5] h-full flex flex-col shadow-xl overflow-hidden"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#03091e]/95 backdrop-blur-md px-6 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#D9DEE5] bg-[#F5F7FA]">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">
+              <h2 id="drawer-title" className="text-lg font-bold text-[#1F3A5F]">
                 {district.name}
               </h2>
-              <span className="text-xs text-gray-400 font-medium">({district.state})</span>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold uppercase ${getRiskBadgeColor(
-                  district.riskLevel
-                )}`}
-              >
-                {district.riskLevel} Risk · {district.riskScore}/100
+              <span className="text-xs px-2 py-0.5 rounded bg-slate-200/80 text-[#5B6675] font-semibold">
+                {district.state}
               </span>
             </div>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Identified Crop-Residue Hotspots & Clean Alternative Action Plan
+            <p className="text-xs text-[#5B6675] mt-0.5">
+              Agricultural Fire Cluster & Clean Alternatives Triage
             </p>
           </div>
-
           <button
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors focus:ring-2 focus:ring-emerald-400"
+            className="p-1.5 rounded-md hover:bg-slate-200 text-[#5B6675] hover:text-[#1B2430] transition-colors focus-visible:ring-2 focus-visible:ring-[#1F3A5F]"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 flex flex-col gap-6">
-          {/* Risk Breakdown Box */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-gray-200">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>Transparent Risk Heuristic Breakdown</span>
-              </div>
-              <span className="text-[10px] font-mono text-gray-400">Delhi Receptor Impact</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="bg-black/30 border border-white/5 rounded-lg p-2.5">
-                <div className="text-[10px] text-gray-400 font-medium">Active Fires</div>
-                <div className="text-base font-bold text-red-400 mt-0.5">
-                  {district.fireCount}
-                </div>
-                <div className="text-[10px] text-gray-400">Total: {district.totalFrp} MW</div>
-              </div>
-
-              <div className="bg-black/30 border border-white/5 rounded-lg p-2.5">
-                <div className="text-[10px] text-gray-400 font-medium">Distance to Delhi</div>
-                <div className="text-base font-bold text-cyan-400 mt-0.5">
-                  {district.distanceToDelhiKm.toFixed(0)} <span className="text-xs font-normal">km</span>
-                </div>
-                <div className="text-[10px] text-gray-400">{district.bearingToDelhiDeg.toFixed(0)}° Azimuth</div>
-              </div>
-
-              <div className="bg-black/30 border border-white/5 rounded-lg p-2.5">
-                <div className="text-[10px] text-gray-400 font-medium">Wind Alignment</div>
-                <div className="text-base font-bold text-emerald-400 mt-0.5">
-                  {(district.windAlignment * 100).toFixed(0)}%
-                </div>
-                <div className="text-[10px] text-gray-400">Trajectory to NCR</div>
+        {/* Content Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          {/* Risk Level & Score Badge */}
+          <div className="bg-[#F5F7FA] border border-[#D9DEE5] rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-[#5B6675] uppercase tracking-wider">
+                Delhi Air Quality Risk Assessment
+              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getRiskBadgeClasses(
+                    district.riskLevel
+                  )}`}
+                >
+                  {district.riskLevel.toUpperCase()} RISK · {district.riskScore}/100
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowFormulaInfo(!showFormulaInfo)}
+                  className="text-[#5B6675] hover:text-[#1F3A5F] p-0.5"
+                  title="View Risk Heuristic Formula"
+                  aria-label="View Risk Heuristic Formula"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            <div className="text-[11px] text-gray-400 leading-relaxed bg-black/20 p-2.5 rounded border border-white/5">
-              <b>Heuristic Weighting:</b> 40% Fire Density + 30% Proximity (50–450 km scale) + 30% Downwind Plume Trajectory.
+            {/* Formula Explanation Popover */}
+            {showFormulaInfo && (
+              <div className="mb-3 p-3 bg-white border border-[#D9DEE5] rounded-md text-xs text-[#5B6675] space-y-1 shadow-xs">
+                <p className="font-semibold text-[#1F3A5F]">Transparent Risk Heuristic Weights:</p>
+                <p>• <strong>Fire Volume (40%)</strong>: Active VIIRS fire count normalized up to 50 fires.</p>
+                <p>• <strong>Proximity (30%)</strong>: Geodesic distance to Delhi NCR (50 km - 450 km).</p>
+                <p>• <strong>Wind Trajectory (30%)</strong>: Aerodynamic cosine alignment of prevailing plume heading towards Delhi.</p>
+              </div>
+            )}
+
+            {/* Risk Factors Breakdown */}
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#E5E9F0] text-center">
+              <div>
+                <span className="block text-xs text-[#5B6675]">Active Fires</span>
+                <span className="text-base font-bold text-[#C62828]">{district.fireCount}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-[#5B6675]">Distance to NCR</span>
+                <span className="text-base font-bold text-[#1B2430]">{district.distanceToDelhiKm} km</span>
+              </div>
+              <div>
+                <span className="block text-xs text-[#5B6675]">Downwind Vector</span>
+                <span className="text-base font-bold text-[#E65100]">
+                  {Math.round(district.windAlignment * 100)}%
+                </span>
+              </div>
             </div>
           </div>
 
-{/* Demand Signal from Marketplace */}
-          {district.demandSignals && district.demandSignals.count > 0 && (
-            <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2.5">
-              <span className="text-base">📢</span>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
-                    Farmer Supply Demand Signal
-                  </span>
-                  <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-semibold">
-                    {district.demandSignals.count} Active Listing{district.demandSignals.count > 1 ? 's' : ''}
-                  </span>
-                </div>
-                <p className="text-xs text-amber-100/90 mt-1">
-                  <b>{district.demandSignals.totalQuintals.toLocaleString()} Quintals</b> of paddy straw listed by local farmers in {district.name} awaiting buyer off-take.
-                </p>
-                <div className="mt-2 flex items-center justify-between text-[11px]">
-                  <span className="text-amber-200/60">Zero personal data · Aggregated capacity indicator</span>
-                  <Link href={`/market?district=${encodeURIComponent(district.name)}`} className="text-amber-300 hover:text-white font-medium underline">
-                    Browse Listings →
-                  </Link>
-                </div>
-              </div>
+          {/* Stubble Marketplace Demand Signals */}
+          <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-lg p-3 text-xs text-emerald-900 flex items-center justify-between">
+            <div>
+              <span className="font-bold block text-emerald-950">Residue Marketplace Availability</span>
+              <span>
+                {district.demandSignals && district.demandSignals.count > 0
+                  ? `${district.demandSignals.count} listing (${district.demandSignals.totalQuintals} Quintals available for pickup)`
+                  : 'No active listings in this district yet.'}
+              </span>
             </div>
-          )}
+            <Link
+              href={`/market/sell?district=${encodeURIComponent(district.name)}&ref=drawer`}
+              className="px-2.5 py-1.5 bg-[#2E7D32] hover:bg-[#236327] text-white rounded text-xs font-semibold shrink-0 transition-colors"
+            >
+              List Stubble
+            </Link>
+          </div>
 
-          {/* Matched Alternatives Section */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-200">
-                  Nearest Clean Alternatives Found
-                </h3>
-              </div>
-              {district.matchedAlternatives.some(a => !a.isDemo) ? (
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 rounded-md">
-                  PEDA / PIB / IOCL Official Registry
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-md">
-                  Demo Data (Synthetic Benchmark)
-                </span>
-              )}
-            </div>
+          {/* Nearest Clean Alternatives Section */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#5B6675]">
+              Nearest Verified Clean Alternatives
+            </h3>
 
-            <div className="flex flex-col gap-3">
+            <div className="space-y-2">
               {district.matchedAlternatives.map((alt) => (
                 <div
                   key={alt.id}
-                  className="bg-white/5 hover:bg-white/[0.08] transition-colors border border-white/10 rounded-xl p-4 flex flex-col gap-2 relative overflow-hidden group"
+                  className="p-3 bg-white border border-[#D9DEE5] rounded-lg hover:border-slate-400 transition-colors space-y-1"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                        {getAlternativeIcon(alt.type)}
-                      </div>
-                      <div>
-                        <div className="text-xs font-medium text-emerald-400 uppercase tracking-wide">
-                          {getAlternativeTypeLabel(alt.type)}
-                        </div>
-                        <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-                          {alt.name}
-                        </div>
-                      </div>
+                      {getAlternativeIcon(alt.type)}
+                      <span className="font-bold text-xs text-[#1F3A5F]">{alt.name}</span>
                     </div>
-
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-2 py-1 rounded-md">
-                        {alt.distanceKm} km away
-                      </div>
-                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
-                        {alt.district}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 pt-2 border-t border-white/5">
-                    <div>
-                      <span className="text-gray-400 text-[11px]">Pricing / Incentive:</span>
-                      <div className="font-semibold text-emerald-400">
-                        {alt.priceQuote ?? 'Standard Market Rate'}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-gray-400 text-[11px]">Capacity / Fleet:</span>
-                      <div className="font-medium text-gray-200 truncate">
-                        {alt.capacityOrFleet ?? 'Active Processing Unit'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs">
-                    <span className="text-[11px] font-mono text-gray-400">
-                      Contact: <span className="text-white font-bold">{alt.contact ?? 'Official Desk'}</span>
+                    <span className="text-xs font-semibold text-[#5B6675] bg-slate-100 px-2 py-0.5 rounded">
+                      approx. {alt.distanceKm} km
                     </span>
+                  </div>
 
-                    <div className="flex items-center gap-2">
-                      {alt.sourceUrl && (
-                        <a
-                          href={alt.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono"
-                        >
-                          Source Link ↗
-                        </a>
-                      )}
-                      {alt.isDemo ? (
-                        <span className="text-[10px] text-amber-400 font-mono">
-                          ● Demo Facility
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-emerald-400 font-mono">
-                          ● Official Entity {alt.status ? `(${alt.status})` : ''}
-                        </span>
-                      )}
-                    </div>
+                  <p className="text-[11px] text-[#5B6675]">
+                    {getAlternativeTypeLabel(alt.type)} · {alt.district}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-[#F1F4F9] text-xs">
+                    <span className="text-emerald-700 font-semibold">{alt.priceQuote}</span>
+                    <span className="text-[#5B6675] font-mono text-[11px]">Ph: {alt.contact}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Farmer Advisory Generator Section */}
-          <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-5 flex flex-col gap-4">
+          {/* Trilingual Farmer Message Generator */}
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                  <span>Farmer Message Generator</span>
-                  <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/40">
-                    Ready-to-Send
-                  </span>
-                </h3>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Personalized SMS / WhatsApp notification with nearest non-burning options.
-                </p>
-              </div>
-
-              {/* Language Selector */}
-              <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-1 gap-1">
-                {messages.map((m) => (
-                  <button
-                    key={m.lang}
-                    onClick={() => setSelectedLang(m.lang)}
-                    className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all ${
-                      selectedLang === m.lang
-                        ? 'bg-emerald-500 text-black font-bold shadow'
-                        : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {m.label}
-                  </button>
-                ))}
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#5B6675]">
+                Farmer Advisory Generator
+              </h3>
+              {/* Language Pills */}
+              <div className="flex gap-1 bg-[#F5F7FA] border border-[#D9DEE5] p-0.5 rounded-md">
+                <button
+                  onClick={() => setSelectedLang('en')}
+                  className={`px-2 py-0.5 text-xs rounded font-medium ${
+                    selectedLang === 'en' ? 'bg-[#1F3A5F] text-white' : 'text-[#5B6675] hover:text-[#1B2430]'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setSelectedLang('hi')}
+                  className={`px-2 py-0.5 text-xs rounded font-medium ${
+                    selectedLang === 'hi' ? 'bg-[#1F3A5F] text-white' : 'text-[#5B6675] hover:text-[#1B2430]'
+                  }`}
+                >
+                  हिन्दी
+                </button>
+                <button
+                  onClick={() => setSelectedLang('pa')}
+                  className={`px-2 py-0.5 text-xs rounded font-medium ${
+                    selectedLang === 'pa' ? 'bg-[#1F3A5F] text-white' : 'text-[#5B6675] hover:text-[#1B2430]'
+                  }`}
+                >
+                  ਪੰਜਾਬੀ
+                </button>
               </div>
             </div>
 
-            {/* Message Box */}
+            {/* Advisory Textarea */}
             <div className="relative">
               <textarea
                 readOnly
-                value={currentMessage.message}
                 rows={7}
-                className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-xs text-gray-200 font-mono leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                value={currentMessage.message}
+                className="w-full bg-[#F5F7FA] border border-[#D9DEE5] rounded-lg p-3 text-xs text-[#1B2430] font-sans leading-relaxed resize-none focus:outline-hidden"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleCopy}
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-colors shadow-lg shadow-emerald-500/20 active:scale-95 min-h-[44px]"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md bg-[#1F3A5F] hover:bg-[#162C49] text-white text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#1F3A5F]"
               >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-black" />
-                    <span>Copied Advisory!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-black" />
-                    <span>Copy Message</span>
-                  </>
-                )}
+                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <span>{copied ? 'Copied Advisory!' : 'Copy Advisory'}</span>
               </button>
 
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(currentMessage.message)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition-colors shadow-md shadow-emerald-900/40 min-h-[44px]"
-                title="Share directly via WhatsApp"
+              <button
+                onClick={() => {
+                  const encoded = encodeURIComponent(currentMessage.message);
+                  window.open(`https://wa.me/?text=${encoded}`, '_blank');
+                }}
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-md bg-[#2E7D32] hover:bg-[#236327] text-white text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#2E7D32]"
               >
-                <Share2 className="w-4 h-4 text-emerald-200" />
+                <Share2 className="w-4 h-4" />
                 <span>Share on WhatsApp</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
-      </aside>
+      </div>
     </div>
   );
 }

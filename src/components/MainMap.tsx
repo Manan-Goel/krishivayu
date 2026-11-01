@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FirmsHotspot, DistrictSummary } from '@/types';
@@ -13,6 +13,31 @@ interface MainMapProps {
   onSelectDistrict: (district: DistrictSummary) => void;
 }
 
+const ALIASES: Record<string, string> = {
+  gurugram: 'gurgaon',
+  sonipat: 'sonepat',
+  sbsnagar: 'nawanshehar',
+  nawanshahr: 'nawanshehar',
+  firozepur: 'firozpur',
+  sasnagar: 'rupnagar',
+  mohali: 'rupnagar',
+  tarntaran: 'amritsar',
+  muktsarsahib: 'muktsar',
+  malerkotla: 'sangrur',
+  barnala: 'sangrur',
+  fazilka: 'firozpur',
+  pathankot: 'gurdaspur',
+  charkhidadri: 'bhiwani',
+  palwal: 'faridabad',
+  mewat: 'gurgaon',
+};
+
+function normalizeName(name: string, state?: string): string {
+  if (state?.toUpperCase() === 'DELHI') return 'delhi';
+  const clean = name.toLowerCase().replace(/[^a-z]/g, '');
+  return ALIASES[clean] || clean;
+}
+
 export function MainMap({
   hotspots,
   districts,
@@ -23,14 +48,19 @@ export function MainMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
 
-  // Initialize MapLibre
+  // Layer toggles
+  const [showHotspots, setShowHotspots] = useState(true);
+  const [showPolygons, setShowPolygons] = useState(true);
+  const [showDelhi, setShowDelhi] = useState(true);
+
+  // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-      center: [76.0, 29.9], // Centered between Punjab, Haryana, and Delhi
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [76.0, 29.9],
       zoom: 7.2,
       minZoom: 5.5,
       maxZoom: 15,
@@ -40,10 +70,16 @@ export function MainMap({
     mapRef.current = map;
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+    map.addControl(
+      new maplibregl.AttributionControl({
+        compact: true,
+        customAttribution: '© <a href="https://carto.com/" target="_blank">CARTO</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+      }),
+      'bottom-left'
+    );
 
-    map.on('load', () => {
-      // 1. Add Delhi Marker / Circle Source
+    map.on('load', async () => {
+      // 1. Delhi point
       map.addSource('delhi-point', {
         type: 'geojson',
         data: {
@@ -51,46 +87,137 @@ export function MainMap({
           features: [
             {
               type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [DELHI_COORDS.lon, DELHI_COORDS.lat],
-              },
-              properties: {
-                title: 'Delhi NCR (India Gate)',
-              },
+              geometry: { type: 'Point', coordinates: [DELHI_COORDS.lon, DELHI_COORDS.lat] },
+              properties: { name: 'Central Delhi (Target Receptor)' },
             },
           ],
         },
       });
 
-      // Delhi outer ring
       map.addLayer({
         id: 'delhi-glow',
         type: 'circle',
         source: 'delhi-point',
         paint: {
-          'circle-radius': 22,
-          'circle-color': '#06b6d4',
-          'circle-opacity': 0.25,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#22d3ee',
+          'circle-radius': 16,
+          'circle-color': '#1F3A5F',
+          'circle-opacity': 0.15,
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#1F3A5F',
         },
       });
 
-      // Delhi central dot
       map.addLayer({
-        id: 'delhi-core',
+        id: 'delhi-inner',
         type: 'circle',
         source: 'delhi-point',
         paint: {
-          'circle-radius': 7,
-          'circle-color': '#0891b2',
+          'circle-radius': 6,
+          'circle-color': '#1F3A5F',
           'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': '#FFFFFF',
         },
       });
 
-      // 2. Add Hotspots GeoJSON Source
+      // 2. Fetch District GeoJSON
+      try {
+        const resp = await fetch('/data/districts.geojson');
+        if (resp.ok) {
+          const geoData = await resp.json();
+
+          map.addSource('district-polygons', {
+            type: 'geojson',
+            data: geoData,
+          });
+
+          // Polygon Fill layer
+          map.addLayer({
+            id: 'district-fills',
+            type: 'fill',
+            source: 'district-polygons',
+            paint: {
+              'fill-color': '#D9DEE5',
+              'fill-opacity': 0.25,
+            },
+          });
+
+          // Polygon Border layer
+          map.addLayer({
+            id: 'district-borders',
+            type: 'line',
+            source: 'district-polygons',
+            paint: {
+              'line-color': '#8892A0',
+              'line-width': 1,
+            },
+          });
+
+          // Hover interaction on polygons
+          map.on('mousemove', 'district-fills', (e) => {
+            if (!e.features || !e.features[0]) return;
+            map.getCanvas().style.cursor = 'pointer';
+            const f = e.features[0];
+            const geoDistName = (f.properties?.district || '') as string;
+            const normGeo = normalizeName(geoDistName);
+
+            // Find matching district summary from props
+            const found = districts.find(
+              (d) => normalizeName(d.name, d.state) === normGeo || normGeo.includes(normalizeName(d.name, d.state))
+            );
+
+            if (found) {
+              const html = `
+                <div style="font-family: inherit; font-size: 12px; line-height: 1.4; color: #1B2430; padding: 2px;">
+                  <div style="font-weight: 700; color: #1F3A5F; font-size: 13px; border-bottom: 1px solid #E5E9F0; padding-bottom: 3px; margin-bottom: 4px;">
+                    ${found.name} (${found.state})
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 2px;">
+                    <span style="color: #5B6675;">Risk Score:</span>
+                    <strong style="color: ${found.riskScore >= 75 ? '#C62828' : found.riskScore >= 51 ? '#E65100' : '#2E7D32'};">${found.riskScore}/100 (${found.riskLevel.toUpperCase()})</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 2px;">
+                    <span style="color: #5B6675;">Active Fires:</span>
+                    <strong>${found.fireCount}</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 2px;">
+                    <span style="color: #5B6675;">Distance to NCR:</span>
+                    <span>${found.distanceToDelhiKm} km</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; gap: 12px;">
+                    <span style="color: #5B6675;">Downwind Vector:</span>
+                    <span>${Math.round(found.windAlignment * 100)}%</span>
+                  </div>
+                </div>
+              `;
+              if (!popupRef.current) {
+                popupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+              }
+              popupRef.current.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            }
+          });
+
+          map.on('mouseleave', 'district-fills', () => {
+            map.getCanvas().style.cursor = '';
+            if (popupRef.current) popupRef.current.remove();
+          });
+
+          map.on('click', 'district-fills', (e) => {
+            if (!e.features || !e.features[0]) return;
+            const geoDistName = (e.features[0].properties?.district || '') as string;
+            const normGeo = normalizeName(geoDistName);
+            const found = districts.find(
+              (d) => normalizeName(d.name, d.state) === normGeo || normGeo.includes(normalizeName(d.name, d.state))
+            );
+            if (found) {
+              onSelectDistrict(found);
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('District polygons could not be loaded:', err);
+      }
+
+      // 3. Hotspots Source
       map.addSource('hotspots-data', {
         type: 'geojson',
         data: {
@@ -99,48 +226,21 @@ export function MainMap({
         },
       });
 
-      // Hotspots outer thermal glow
+      // Hotspots points layer
       map.addLayer({
-        id: 'hotspots-glow',
+        id: 'hotspot-points',
         type: 'circle',
         source: 'hotspots-data',
         paint: {
-          'circle-radius': [
-            'interpolate', ['linear'], ['get', 'frp'],
-            5, 8,
-            25, 14,
-            50, 22,
-          ],
-          'circle-color': '#ef4444',
-          'circle-opacity': 0.35,
-          'circle-blur': 0.8,
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2.5, 9, 4, 12, 7],
+          'circle-color': '#E65100',
+          'circle-stroke-width': 0.75,
+          'circle-stroke-color': '#FFFFFF',
+          'circle-opacity': 0.85,
         },
       });
 
-      // Hotspots inner core
-      map.addLayer({
-        id: 'hotspots-point',
-        type: 'circle',
-        source: 'hotspots-data',
-        paint: {
-          'circle-radius': [
-            'interpolate', ['linear'], ['get', 'frp'],
-            5, 3.5,
-            25, 6,
-            50, 9,
-          ],
-          'circle-color': [
-            'interpolate', ['linear'], ['get', 'frp'],
-            5, '#fbbf24',
-            20, '#f97316',
-            40, '#dc2626',
-          ],
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#ffffff',
-        },
-      });
-
-      // 3. Add District Centroids GeoJSON Source
+      // 4. District Centroids Source
       map.addSource('districts-data', {
         type: 'geojson',
         data: {
@@ -149,226 +249,208 @@ export function MainMap({
         },
       });
 
-      // District risk halo
       map.addLayer({
-        id: 'districts-halo',
+        id: 'district-markers',
         type: 'circle',
         source: 'districts-data',
         paint: {
-          'circle-radius': [
-            'interpolate', ['linear'], ['get', 'riskScore'],
-            0, 16,
-            50, 24,
-            100, 34,
-          ],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 9, 7, 12, 10],
           'circle-color': [
             'case',
-            ['>=', ['get', 'riskScore'], 76], '#ef4444',
-            ['>=', ['get', 'riskScore'], 51], '#f97316',
-            ['>=', ['get', 'riskScore'], 26], '#eab308',
-            '#22c55e',
+            ['>=', ['get', 'riskScore'], 75], '#C62828',
+            ['>=', ['get', 'riskScore'], 51], '#E65100',
+            ['>=', ['get', 'riskScore'], 26], '#F9A825',
+            '#2E7D32'
           ],
-          'circle-opacity': 0.25,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': [
-            'case',
-            ['>=', ['get', 'riskScore'], 76], '#dc2626',
-            ['>=', ['get', 'riskScore'], 51], '#ea580c',
-            ['>=', ['get', 'riskScore'], 26], '#ca8a04',
-            '#16a34a',
-          ],
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#FFFFFF',
         },
       });
 
-      // District center dot
       map.addLayer({
-        id: 'districts-core',
-        type: 'circle',
-        source: 'districts-data',
-        paint: {
-          'circle-radius': 9,
-          'circle-color': [
-            'case',
-            ['>=', ['get', 'riskScore'], 76], '#b91c1c',
-            ['>=', ['get', 'riskScore'], 51], '#c2410c',
-            ['>=', ['get', 'riskScore'], 26], '#a16207',
-            '#15803d',
-          ],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-        },
-      });
-
-      // District label
-      map.addLayer({
-        id: 'districts-labels',
+        id: 'district-labels',
         type: 'symbol',
         source: 'districts-data',
+        minzoom: 7.5,
         layout: {
-          'text-field': ['concat', ['get', 'name'], '\n', ['to-string', ['get', 'riskScore']], '/100'],
+          'text-field': ['concat', ['get', 'name'], ' (', ['to-string', ['get', 'riskScore']], ')'],
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
           'text-size': 11,
-          'text-offset': [0, 1.8],
+          'text-offset': [0, 1.2],
           'text-anchor': 'top',
-          'text-font': ['Noto Sans Bold', 'Arial Unicode MS Bold'],
         },
         paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': '#020714',
-          'text-halo-width': 2,
+          'text-color': '#1B2430',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 1.5,
         },
       });
 
-      // Click district to select
-      map.on('click', 'districts-core', (e) => {
+      map.on('click', 'district-markers', (e) => {
         if (!e.features || !e.features[0]) return;
-        const key = e.features[0].properties?.districtKey;
-        const target = districts.find((d) => d.districtKey === key);
-        if (target) onSelectDistrict(target);
-      });
-
-      map.on('mouseenter', 'districts-core', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-
-      map.on('mouseleave', 'districts-core', () => {
-        map.getCanvas().style.cursor = '';
-      });
-
-      // Click hotspot to show popup or select district
-      map.on('click', 'hotspots-point', (e) => {
-        if (!e.features || !e.features[0]) return;
-        const geom = e.features[0].geometry as { type: string; coordinates: [number, number] };
-        const props = e.features[0].properties;
-
-        if (popupRef.current) popupRef.current.remove();
-
-        const popup = new maplibregl.Popup({ offset: 12 })
-          .setLngLat(geom.coordinates)
-          .setHTML(`
-            <div style="font-family: sans-serif; font-size: 12px; color: #1e293b; line-height: 1.4;">
-              <div style="font-weight: 700; color: #dc2626;">🔥 Active Fire Hotspot</div>
-              <div><b>FRP:</b> ${props?.frp ?? 'N/A'} MW</div>
-              <div><b>Brightness:</b> ${props?.brightness ?? 'N/A'} K</div>
-              <div><b>Confidence:</b> ${props?.confidence ?? 'N/A'}</div>
-              <div><b>District:</b> ${props?.district ?? 'Unknown'} (${props?.state ?? ''})</div>
-              <div><b>Detected:</b> ${props?.acq_date ?? ''} ${props?.acq_time ?? ''} UTC</div>
-            </div>
-          `)
-          .addTo(map);
-
-        popupRef.current = popup;
-      });
-
-      map.on('mouseenter', 'hotspots-point', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-
-      map.on('mouseleave', 'hotspots-point', () => {
-        map.getCanvas().style.cursor = '';
+        const distName = e.features[0].properties?.name;
+        const found = districts.find((d) => d.name === distName);
+        if (found) onSelectDistrict(found);
       });
     });
 
     return () => {
-      if (popupRef.current) popupRef.current.remove();
       map.remove();
       mapRef.current = null;
     };
-  }, [districts, onSelectDistrict]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Update GeoJSON layers when hotspots or districts change
+  // Update hotspot points
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
 
-    // Update Hotspots Source
-    const hotspotsSource = map.getSource('hotspots-data') as maplibregl.GeoJSONSource | undefined;
-    if (hotspotsSource) {
-      hotspotsSource.setData({
-        type: 'FeatureCollection',
-        features: hotspots.map((h) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [h.longitude, h.latitude],
-          },
-          properties: {
-            id: h.id,
-            frp: h.frp,
-            brightness: h.brightness,
-            confidence: h.confidence,
-            satellite: h.satellite,
-            district: h.district,
-            state: h.state,
-            acq_date: h.acq_date,
-            acq_time: h.acq_time,
-          },
-        })),
-      });
+    const source = map.getSource('hotspots-data') as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    const features = hotspots.map((h) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [h.longitude, h.latitude] },
+      properties: { frp: h.frp, confidence: h.confidence, time: h.acq_time },
+    }));
+
+    source.setData({ type: 'FeatureCollection', features });
+  }, [hotspots]);
+
+  // Update district data & polygon colors
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource('districts-data') as maplibregl.GeoJSONSource | undefined;
+    if (source) {
+      const features = districts.map((d) => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [d.lon, d.lat] },
+        properties: { name: d.name, riskScore: d.riskScore, riskLevel: d.riskLevel, fireCount: d.fireCount },
+      }));
+      source.setData({ type: 'FeatureCollection', features });
     }
 
-    // Update Districts Source
-    const districtsSource = map.getSource('districts-data') as maplibregl.GeoJSONSource | undefined;
-    if (districtsSource) {
-      districtsSource.setData({
-        type: 'FeatureCollection',
-        features: districts.map((d) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [d.lon, d.lat],
-          },
-          properties: {
-            districtKey: d.districtKey,
-            name: d.name,
-            state: d.state,
-            riskScore: d.riskScore,
-            riskLevel: d.riskLevel,
-            fireCount: d.fireCount,
-          },
-        })),
-      });
+    // Colorize district polygon fills based on live district scores
+    if (map.getLayer('district-fills')) {
+      const matchExpr: (string | number | string[])[] = ['match', ['get', 'district']];
+      for (const d of districts) {
+        const norm = normalizeName(d.name, d.state);
+        const color =
+          d.riskScore >= 75
+            ? 'rgba(198, 40, 40, 0.35)'
+            : d.riskScore >= 51
+            ? 'rgba(230, 81, 0, 0.30)'
+            : d.riskScore >= 26
+            ? 'rgba(249, 168, 37, 0.25)'
+            : 'rgba(46, 125, 50, 0.20)';
+        matchExpr.push(d.name, color);
+        // Also push normalized variants
+        if (norm !== d.name.toLowerCase()) {
+          matchExpr.push(norm, color);
+        }
+      }
+      matchExpr.push('rgba(217, 222, 229, 0.2)'); // fallback
+
+      try {
+        map.setPaintProperty('district-fills', 'fill-color', matchExpr as unknown as maplibregl.ExpressionSpecification);
+      } catch {
+        // ignore match syntax if features empty
+      }
     }
-  }, [hotspots, districts]);
+  }, [districts]);
 
   // Fly to selected district
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedDistrict) return;
-
     map.flyTo({
       center: [selectedDistrict.lon, selectedDistrict.lat],
-      zoom: 9.2,
-      speed: 1.2,
-      curve: 1.4,
-      essential: true,
+      zoom: 8.8,
+      duration: 800,
     });
   }, [selectedDistrict]);
 
+  // Toggle layer visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    if (map.getLayer('hotspot-points')) {
+      map.setLayoutProperty('hotspot-points', 'visibility', showHotspots ? 'visible' : 'none');
+    }
+    if (map.getLayer('district-fills')) {
+      map.setLayoutProperty('district-fills', 'visibility', showPolygons ? 'visible' : 'none');
+    }
+    if (map.getLayer('district-borders')) {
+      map.setLayoutProperty('district-borders', 'visibility', showPolygons ? 'visible' : 'none');
+    }
+    if (map.getLayer('delhi-glow') && map.getLayer('delhi-inner')) {
+      map.setLayoutProperty('delhi-glow', 'visibility', showDelhi ? 'visible' : 'none');
+      map.setLayoutProperty('delhi-inner', 'visibility', showDelhi ? 'visible' : 'none');
+    }
+  }, [showHotspots, showPolygons, showDelhi]);
+
   return (
-    <div className="relative w-full h-full min-h-[420px] bg-[#020714] overflow-hidden rounded-xl border border-white/10">
+    <div className="relative w-full h-full min-h-[460px] bg-[#F5F7FA]">
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Map Legend */}
-      <div className="absolute bottom-4 right-4 z-10 bg-[#020714]/90 backdrop-blur-md border border-white/10 rounded-lg p-3 text-[11px] shadow-xl pointer-events-none">
-        <div className="font-semibold text-white mb-2 flex items-center gap-1.5">
-          <span>Map Legend</span>
+      {/* Government Portal Map Legend & Layer Controls */}
+      <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-xs border border-[#D9DEE5] rounded-md p-3 shadow-xs text-xs max-w-xs space-y-2.5">
+        <div className="font-bold text-[#1F3A5F] flex items-center justify-between border-b border-[#E5E9F0] pb-1.5">
+          <span>Map Layers & Legend</span>
         </div>
-        <div className="flex flex-col gap-1.5 text-gray-300">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-500 border border-white/80" />
-            <span>Active Fire Hotspot (VIIRS 375m)</span>
+
+        {/* Layer Toggles */}
+        <div className="space-y-1.5 border-b border-[#E5E9F0] pb-2 text-[11px]">
+          <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
+            <input
+              type="checkbox"
+              checked={showPolygons}
+              onChange={(e) => setShowPolygons(e.target.checked)}
+              className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
+            />
+            <span>District Risk Polygons</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
+            <input
+              type="checkbox"
+              checked={showHotspots}
+              onChange={(e) => setShowHotspots(e.target.checked)}
+              className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
+            />
+            <span>Thermal Hotspots (VIIRS)</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
+            <input
+              type="checkbox"
+              checked={showDelhi}
+              onChange={(e) => setShowDelhi(e.target.checked)}
+              className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
+            />
+            <span>Delhi Receptor Zone</span>
+          </label>
+        </div>
+
+        {/* Risk Level Color Palette */}
+        <div className="space-y-1 text-[11px]">
+          <span className="font-semibold text-[#5B6675] block">Risk Prioritization</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#C62828] shrink-0" />
+            <span className="text-[#1B2430]">Critical Risk (Score ≥ 75)</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-cyan-400 border border-white/80" />
-            <span>Delhi NCR (Target Impact Receptor)</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#E65100] shrink-0" />
+            <span className="text-[#1B2430]">High Risk (Score 51 - 74)</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full border-2 border-red-500 bg-red-500/30" />
-            <span>Critical/High Risk District (Score ≥ 51)</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#F9A825] shrink-0" />
+            <span className="text-[#1B2430]">Moderate Risk (Score 26 - 50)</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full border-2 border-yellow-500 bg-yellow-500/30" />
-            <span>Moderate/Low Risk District</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#2E7D32] shrink-0" />
+            <span className="text-[#1B2430]">Low Risk (Score 0 - 25)</span>
           </div>
         </div>
       </div>

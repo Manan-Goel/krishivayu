@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx --yes tsx tests/domain.test.ts && npx --yes tsx tests/weather.test.ts && npx --yes tsx tests/alternatives.test.ts && npx --yes tsx tests/resilience.test.ts && npx --yes tsx tests/market.test.ts"
+    "test": "npx --yes tsx tests/domain.test.ts && npx --yes tsx tests/weather.test.ts && npx --yes tsx tests/alternatives.test.ts && npx --yes tsx tests/resilience.test.ts && npx --yes tsx tests/market.test.ts && npx --yes tsx tests/repo.test.ts"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",

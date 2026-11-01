@@ -1,11 +1,11 @@
 'use client';
 
-import {
-  Calendar, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import type { PublicListing } from '@/lib/marketSanitizer';
 import type { Offer, BuyerProfile } from '@/types/market';
 import {
+  Calendar,
   Building2,
   Send,
   ShieldCheck,
@@ -29,6 +29,8 @@ interface ListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOfferSubmitted: () => void;
+  userRole?: 'public' | 'farmer' | 'buyer';
+  onRoleChange?: (role: 'public' | 'farmer' | 'buyer') => void;
 }
 
 const DEMO_BUYERS: BuyerProfile[] = [
@@ -66,6 +68,8 @@ export function ListingModal({
   isOpen,
   onClose,
   onOfferSubmitted,
+  userRole,
+  onRoleChange,
 }: ListingModalProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'offers' | 'alternatives' | 'make_offer'>('details');
   const [offers, setOffers] = useState<Offer[]>([]);

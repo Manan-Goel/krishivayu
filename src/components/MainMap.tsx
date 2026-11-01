@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FirmsHotspot, DistrictSummary } from '@/types';
 import { DELHI_COORDS } from '@/lib/geo';
+import { MAJOR_REGIONAL_CITIES } from '@/lib/cities';
 
 interface MainMapProps {
   hotspots: FirmsHotspot[];
@@ -51,6 +52,8 @@ export function MainMap({
   // Layer toggles
   const [showHotspots, setShowHotspots] = useState(true);
   const [showPolygons, setShowPolygons] = useState(true);
+  const [showDistricts, setShowDistricts] = useState(true);
+  const [showCities, setShowCities] = useState(true);
   const [showDelhi, setShowDelhi] = useState(true);
 
   // Initialize Map
@@ -271,10 +274,10 @@ export function MainMap({
         id: 'district-labels',
         type: 'symbol',
         source: 'districts-data',
-        minzoom: 7.5,
+        minzoom: 5.5,
         layout: {
           'text-field': ['concat', ['get', 'name'], ' (', ['to-string', ['get', 'riskScore']], ')'],
-          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-font': ['Open Sans Bold', 'Open Sans Regular'],
           'text-size': 11,
           'text-offset': [0, 1.2],
           'text-anchor': 'top',
@@ -282,8 +285,72 @@ export function MainMap({
         paint: {
           'text-color': '#1B2430',
           'text-halo-color': '#FFFFFF',
-          'text-halo-width': 1.5,
+          'text-halo-width': 2,
         },
+      });
+
+      // 5. Regional Cities Source & Layers
+      map.addSource('cities-data', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: MAJOR_REGIONAL_CITIES.map((c) => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [c.lon, c.lat] },
+            properties: { name: c.name, state: c.state, importance: c.importance },
+          })),
+        },
+      });
+
+      map.addLayer({
+        id: 'city-markers',
+        type: 'circle',
+        source: 'cities-data',
+        minzoom: 5.5,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3.5, 9, 5, 12, 7],
+          'circle-color': '#1F3A5F',
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#FFFFFF',
+        },
+      });
+
+      map.addLayer({
+        id: 'city-labels',
+        type: 'symbol',
+        source: 'cities-data',
+        minzoom: 5.5,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Bold', 'Open Sans Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 11, 9, 13],
+          'text-offset': [0, -1.2],
+          'text-anchor': 'bottom',
+        },
+        paint: {
+          'text-color': '#1F3A5F',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 2,
+        },
+      });
+
+      map.on('click', 'city-markers', (e) => {
+        if (!e.features || !e.features[0]) return;
+        const cityName = e.features[0].properties?.name;
+        const stateName = e.features[0].properties?.state;
+        const html = `
+          <div style="font-family: inherit; font-size: 12px; line-height: 1.4; color: #1B2430; padding: 2px;">
+            <div style="font-weight: 700; color: #1F3A5F; font-size: 13px; border-bottom: 1px solid #E5E9F0; padding-bottom: 3px; margin-bottom: 4px;">
+              ${cityName}
+            </div>
+            <div style="color: #5B6675;">State: <strong>${stateName}</strong></div>
+            <div style="color: #5B6675; margin-top: 2px;">Regional Urban / Monitoring Node</div>
+          </div>
+        `;
+        if (!popupRef.current) {
+          popupRef.current = new maplibregl.Popup({ closeButton: true });
+        }
+        popupRef.current.setLngLat(e.lngLat).setHTML(html).addTo(map);
       });
 
       map.on('click', 'district-markers', (e) => {
@@ -386,11 +453,23 @@ export function MainMap({
     if (map.getLayer('district-borders')) {
       map.setLayoutProperty('district-borders', 'visibility', showPolygons ? 'visible' : 'none');
     }
+    if (map.getLayer('district-markers')) {
+      map.setLayoutProperty('district-markers', 'visibility', showDistricts ? 'visible' : 'none');
+    }
+    if (map.getLayer('district-labels')) {
+      map.setLayoutProperty('district-labels', 'visibility', showDistricts ? 'visible' : 'none');
+    }
+    if (map.getLayer('city-markers')) {
+      map.setLayoutProperty('city-markers', 'visibility', showCities ? 'visible' : 'none');
+    }
+    if (map.getLayer('city-labels')) {
+      map.setLayoutProperty('city-labels', 'visibility', showCities ? 'visible' : 'none');
+    }
     if (map.getLayer('delhi-glow') && map.getLayer('delhi-inner')) {
       map.setLayoutProperty('delhi-glow', 'visibility', showDelhi ? 'visible' : 'none');
       map.setLayoutProperty('delhi-inner', 'visibility', showDelhi ? 'visible' : 'none');
     }
-  }, [showHotspots, showPolygons, showDelhi]);
+  }, [showHotspots, showPolygons, showDistricts, showCities, showDelhi]);
 
   return (
     <div className="relative w-full h-full min-h-[460px] bg-[#F5F7FA]">
@@ -412,6 +491,24 @@ export function MainMap({
               className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
             />
             <span>District Risk Polygons</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
+            <input
+              type="checkbox"
+              checked={showDistricts}
+              onChange={(e) => setShowDistricts(e.target.checked)}
+              className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
+            />
+            <span>District Risk Badges & Scores</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
+            <input
+              type="checkbox"
+              checked={showCities}
+              onChange={(e) => setShowCities(e.target.checked)}
+              className="rounded text-[#1F3A5F] focus:ring-[#1F3A5F]"
+            />
+            <span>Major Regional Cities</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer text-[#1B2430]">
             <input

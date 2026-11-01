@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Listing } from '@/types/market';
 import type { PublicListing } from '@/lib/marketSanitizer';
+import { MAJOR_REGIONAL_CITIES } from '@/lib/cities';
 
 type MarketMapListing = Listing | PublicListing;
 
@@ -72,6 +73,115 @@ export function MarketMap({
       }),
       'bottom-left'
     );
+
+    map.on('load', async () => {
+      // 1. District Boundaries
+      try {
+        const resp = await fetch('/data/districts.geojson');
+        if (resp.ok) {
+          const geoData = await resp.json();
+          map.addSource('district-polygons', {
+            type: 'geojson',
+            data: geoData,
+          });
+
+          map.addLayer({
+            id: 'district-borders',
+            type: 'line',
+            source: 'district-polygons',
+            paint: {
+              'line-color': '#CBD5E1',
+              'line-width': 1,
+            },
+          });
+        }
+      } catch (err) {
+        console.warn('District boundaries failed to load:', err);
+      }
+
+      // 2. District Center Labels
+      const districtFeatures = Object.entries(DISTRICT_COORDS).map(([name, coords]) => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: coords },
+        properties: { name },
+      }));
+
+      map.addSource('district-points', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: districtFeatures,
+        },
+      });
+
+      map.addLayer({
+        id: 'district-labels',
+        type: 'symbol',
+        source: 'district-points',
+        minzoom: 6.0,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Bold', 'Open Sans Regular'],
+          'text-size': 10.5,
+          'text-offset': [0, 1.2],
+          'text-anchor': 'top',
+        },
+        paint: {
+          'text-color': '#5B6675',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 2,
+        },
+      });
+
+      // 3. Regional Cities
+      const regionalCities = MAJOR_REGIONAL_CITIES.filter(
+        (c) => c.state === 'Punjab' || c.state === 'Chandigarh' || c.state === 'Haryana'
+      );
+
+      map.addSource('regional-cities', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: regionalCities.map((c) => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [c.lon, c.lat] },
+            properties: { name: c.name, state: c.state },
+          })),
+        },
+      });
+
+      map.addLayer({
+        id: 'city-points',
+        type: 'circle',
+        source: 'regional-cities',
+        minzoom: 6.0,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 9, 4.5],
+          'circle-color': '#1F3A5F',
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#FFFFFF',
+        },
+      });
+
+      map.addLayer({
+        id: 'city-labels',
+        type: 'symbol',
+        source: 'regional-cities',
+        minzoom: 6.0,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Bold', 'Open Sans Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 11, 9, 13],
+          'text-offset': [0, -1.2],
+          'text-anchor': 'bottom',
+        },
+        paint: {
+          'text-color': '#1F3A5F',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 2,
+        },
+      });
+    });
 
     return () => {
       map.remove();

@@ -132,11 +132,12 @@ function YearPills({
   allYears,
   selected,
   onChange,
-  }: {
+  hasLive,
+}: {
   allYears: string[];
   selected: string[];
   onChange: (y: string[]) => void;
-  
+  hasLive?: boolean;
 }) {
   const toggleYear = (yr: string) => {
     if (selected.includes(yr)) {

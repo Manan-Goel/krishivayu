@@ -157,10 +157,10 @@ function SellFlowForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F5F7FA] text-[#1B2430] flex flex-col">
 
       {/* Header with Language Selector */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
+      <header className="border-b border-[#D9DEE5] bg-white sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/"
@@ -175,12 +175,12 @@ function SellFlowForm() {
         </div>
 
         {/* Language Switcher */}
-        <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-xs">
+        <div className="flex items-center bg-[#F5F7FA] rounded-lg p-0.5 border border-[#D9DEE5] text-xs">
           <button
             type="button"
             onClick={() => setLang('en')}
             className={`px-2.5 py-1 rounded-md transition-colors min-h-[36px] ${
-              lang === 'en' ? 'bg-emerald-600 text-white font-medium' : 'text-slate-400 hover:text-white'
+              lang === 'en' ? 'bg-[#1F3A5F] text-white font-medium' : 'text-[#5B6675] hover:text-[#1B2430]'
             }`}
           >
             English
@@ -189,7 +189,7 @@ function SellFlowForm() {
             type="button"
             onClick={() => setLang('hi')}
             className={`px-2.5 py-1 rounded-md transition-colors min-h-[36px] ${
-              lang === 'hi' ? 'bg-emerald-600 text-white font-medium' : 'text-slate-400 hover:text-white'
+              lang === 'hi' ? 'bg-[#1F3A5F] text-white font-medium' : 'text-[#5B6675] hover:text-[#1B2430]'
             }`}
           >
             हिन्दी
@@ -198,7 +198,7 @@ function SellFlowForm() {
             type="button"
             onClick={() => setLang('pa')}
             className={`px-2.5 py-1 rounded-md transition-colors min-h-[36px] ${
-              lang === 'pa' ? 'bg-emerald-600 text-white font-medium' : 'text-slate-400 hover:text-white'
+              lang === 'pa' ? 'bg-[#1F3A5F] text-white font-medium' : 'text-[#5B6675] hover:text-[#1B2430]'
             }`}
           >
             ਪੰਜਾਬੀ
@@ -221,12 +221,12 @@ function SellFlowForm() {
         {/* Step Progress Indicators */}
         {step !== 'success' && (
           <div className="mb-6">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-medium">
+            <div className="flex items-center justify-between text-xs text-[#5B6675] mb-2 font-medium">
               <span className={step >= 1 ? 'text-emerald-400' : ''}>1. Location</span>
               <span className={step >= 2 ? 'text-emerald-400' : ''}>2. Quantity</span>
               <span className={step >= 3 ? 'text-emerald-400' : ''}>3. Timing & Price</span>
             </div>
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#F5F7FA] h-2 rounded-full overflow-hidden">
               <div
                 className="bg-emerald-500 h-full transition-all duration-300"
                 style={{ width: `${(step / 3) * 100}%` }}
@@ -245,14 +245,14 @@ function SellFlowForm() {
 
         {/* STEP 1: WHERE */}
         {step === 1 && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+          <div className="bg-white border border-[#D9DEE5] rounded-2xl p-5 sm:p-6 shadow-xl">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">{t.step1Title}</h1>
-                <p className="text-xs sm:text-sm text-slate-400">{t.step1Desc}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-[#1B2430]">{t.step1Title}</h1>
+                <p className="text-xs sm:text-sm text-[#5B6675]">{t.step1Desc}</p>
               </div>
             </div>
 
@@ -264,7 +264,7 @@ function SellFlowForm() {
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                  className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl px-3.5 py-2.5 text-[#1B2430] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
                 >
                   {PUNJAB_DISTRICTS.map((d) => (
                     <option key={d} value={d}>
@@ -283,21 +283,21 @@ function SellFlowForm() {
                   value={village}
                   onChange={(e) => setVillage(e.target.value)}
                   placeholder={t.villagePlaceholder}
-                  className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                  className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl px-3.5 py-2.5 text-[#1B2430] placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
                 />
               </div>
 
               <div className="pt-4 flex justify-between items-center">
                 <Link
                   href="/"
-                  className="min-h-[44px] px-4 py-2 text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors"
+                  className="min-h-[44px] px-4 py-2 text-sm text-[#5B6675] hover:text-[#1B2430] flex items-center gap-1.5 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> Cancel
                 </Link>
                 <button
                   type="button"
                   onClick={handleStep1Next}
-                  className="min-h-[48px] px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
+                  className="min-h-[48px] px-6 py-2.5 bg-[#2E7D32] hover:bg-[#236327] text-white font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
                 >
                   <span>{t.nextBtn}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -309,14 +309,14 @@ function SellFlowForm() {
 
         {/* STEP 2: HOW MUCH */}
         {step === 2 && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+          <div className="bg-white border border-[#D9DEE5] rounded-2xl p-5 sm:p-6 shadow-xl">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Scale className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">{t.step2Title}</h1>
-                <p className="text-xs sm:text-sm text-slate-400">{t.step2Desc}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-[#1B2430]">{t.step2Title}</h1>
+                <p className="text-xs sm:text-sm text-[#5B6675]">{t.step2Desc}</p>
               </div>
             </div>
 
@@ -333,9 +333,9 @@ function SellFlowForm() {
                     max="50000"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl px-3.5 py-2.5 text-[#1B2430] font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                  <span className="text-sm text-slate-400 px-2 shrink-0">Quintals</span>
+                  <span className="text-sm text-[#5B6675] px-2 shrink-0">Quintals</span>
                 </div>
 
                 {/* Quick Selection Chips */}
@@ -347,8 +347,8 @@ function SellFlowForm() {
                       onClick={() => setQuantity(q)}
                       className={`min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                         Number(quantity) === q
-                          ? 'bg-emerald-600 border-emerald-500 text-white'
-                          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
+                          ? 'bg-emerald-600 border-emerald-500 text-[#1B2430]'
+                          : 'bg-[#F5F7FA] border-[#D9DEE5] text-slate-300 hover:bg-slate-700'
                       }`}
                     >
                       {q} Qtl
@@ -368,12 +368,12 @@ function SellFlowForm() {
                     onClick={() => setForm('baled')}
                     className={`p-3.5 rounded-xl border text-left min-h-[64px] transition-all flex flex-col justify-center ${
                       form === 'baled'
-                        ? 'bg-emerald-950/40 border-emerald-500 text-white ring-1 ring-emerald-500'
-                        : 'bg-slate-800/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                        ? 'bg-emerald-950/40 border-emerald-500 text-[#1B2430] ring-1 ring-emerald-500'
+                        : 'bg-[#F5F7FA]/60 border-[#D9DEE5] text-slate-300 hover:bg-[#F5F7FA]'
                     }`}
                   >
                     <span className="font-semibold text-sm">📦 Baled Bundles</span>
-                    <span className="text-xs text-slate-400 mt-0.5">{t.formBaled}</span>
+                    <span className="text-xs text-[#5B6675] mt-0.5">{t.formBaled}</span>
                   </button>
 
                   <button
@@ -381,12 +381,12 @@ function SellFlowForm() {
                     onClick={() => setForm('loose')}
                     className={`p-3.5 rounded-xl border text-left min-h-[64px] transition-all flex flex-col justify-center ${
                       form === 'loose'
-                        ? 'bg-emerald-950/40 border-emerald-500 text-white ring-1 ring-emerald-500'
-                        : 'bg-slate-800/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                        ? 'bg-emerald-950/40 border-emerald-500 text-[#1B2430] ring-1 ring-emerald-500'
+                        : 'bg-[#F5F7FA]/60 border-[#D9DEE5] text-slate-300 hover:bg-[#F5F7FA]'
                     }`}
                   >
                     <span className="font-semibold text-sm">🌾 Loose Straw</span>
-                    <span className="text-xs text-slate-400 mt-0.5">{t.formLoose}</span>
+                    <span className="text-xs text-[#5B6675] mt-0.5">{t.formLoose}</span>
                   </button>
                 </div>
               </div>
@@ -395,14 +395,14 @@ function SellFlowForm() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="min-h-[48px] px-4 py-2 text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors"
+                  className="min-h-[48px] px-4 py-2 text-sm text-[#5B6675] hover:text-[#1B2430] flex items-center gap-1.5 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> {t.backBtn}
                 </button>
                 <button
                   type="button"
                   onClick={handleStep2Next}
-                  className="min-h-[48px] px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
+                  className="min-h-[48px] px-6 py-2.5 bg-[#2E7D32] hover:bg-[#236327] text-white font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
                 >
                   <span>{t.nextBtn}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -416,15 +416,15 @@ function SellFlowForm() {
         {step === 3 && (
           <form
             onSubmit={handleSubmit}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl"
+            className="bg-white border border-[#D9DEE5] rounded-2xl p-5 sm:p-6 shadow-xl"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">{t.step3Title}</h1>
-                <p className="text-xs sm:text-sm text-slate-400">{t.step3Desc}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-[#1B2430]">{t.step3Title}</h1>
+                <p className="text-xs sm:text-sm text-[#5B6675]">{t.step3Desc}</p>
               </div>
             </div>
 
@@ -439,7 +439,7 @@ function SellFlowForm() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl px-3 py-2 text-[#1B2430] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                   />
                 </div>
                 <div>
@@ -450,7 +450,7 @@ function SellFlowForm() {
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl px-3 py-2 text-[#1B2430] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                   />
                 </div>
               </div>
@@ -461,7 +461,7 @@ function SellFlowForm() {
                   {t.priceLabel}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-3.5 text-slate-400 font-medium">₹</span>
+                  <span className="absolute left-3.5 top-3.5 text-[#5B6675] font-medium">₹</span>
                   <input
                     type="number"
                     min="1"
@@ -469,7 +469,7 @@ function SellFlowForm() {
                     placeholder="e.g. 210"
                     value={askingPrice}
                     onChange={(e) => setAskingPrice(e.target.value)}
-                    className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                    className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl pl-8 pr-3.5 py-2.5 text-[#1B2430] font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
                   />
                 </div>
                 {/* Benchmark indicator */}
@@ -485,13 +485,13 @@ function SellFlowForm() {
                   {t.optionalPhoneLabel}
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-4" />
+                  <Phone className="w-4 h-4 text-[#8892A0] absolute left-3.5 top-4" />
                   <input
                     type="tel"
                     placeholder="10-digit mobile number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full min-h-[48px] bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                    className="w-full min-h-[48px] bg-[#F5F7FA] border border-[#D9DEE5] rounded-xl pl-10 pr-3.5 py-2.5 text-[#1B2430] placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
                   />
                 </div>
                 <p className="mt-1.5 text-xs text-cyan-300 bg-cyan-950/40 border border-cyan-500/20 rounded-lg p-2 leading-relaxed">
@@ -503,14 +503,14 @@ function SellFlowForm() {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="min-h-[48px] px-4 py-2 text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors"
+                  className="min-h-[48px] px-4 py-2 text-sm text-[#5B6675] hover:text-[#1B2430] flex items-center gap-1.5 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> {t.backBtn}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[48px] px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
+                  className="min-h-[48px] px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-[#1B2430] font-medium rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-900/30"
                 >
                   {isSubmitting ? t.submittingBtn : t.submitBtn}
                 </button>
@@ -521,33 +521,33 @@ function SellFlowForm() {
 
         {/* SUCCESS SCREEN */}
         {step === 'success' && (
-          <div className="bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-white border border-emerald-500/40 rounded-2xl p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="text-center">
               <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">{t.successTitle}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1B2430] mb-2">{t.successTitle}</h1>
               <p className="text-sm text-slate-300 max-w-md mx-auto mb-6">{t.successSub}</p>
             </div>
 
             {/* Listing Summary Card */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 mb-6 text-sm space-y-2">
-              <div className="flex justify-between items-center text-xs text-slate-400">
+            <div className="bg-[#F5F7FA]/80 border border-[#D9DEE5] rounded-xl p-4 mb-6 text-sm space-y-2">
+              <div className="flex justify-between items-center text-xs text-[#5B6675]">
                 <span>Listing ID:</span>
-                <span className="font-mono text-slate-200">{createdListingId}</span>
+                <span className="font-mono text-[#1B2430]">{createdListingId}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Location:</span>
-                <span className="font-medium text-white">{village}, {district}</span>
+                <span className="text-[#5B6675]">Location:</span>
+                <span className="font-medium text-[#1B2430]">{village}, {district}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Residue:</span>
+                <span className="text-[#5B6675]">Residue:</span>
                 <span className="font-medium text-emerald-400">{quantity} Quintals ({form})</span>
               </div>
             </div>
 
             {/* Private Management Link Card */}
-            <div className="bg-slate-800/80 border border-amber-500/30 rounded-xl p-4 sm:p-5 mb-6">
+            <div className="bg-[#F5F7FA] border border-amber-500/30 rounded-xl p-4 sm:p-5 mb-6">
               <div className="flex items-start gap-2.5 mb-3">
                 <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
@@ -561,7 +561,7 @@ function SellFlowForm() {
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="min-h-[48px] px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-600"
+                  className="min-h-[48px] px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-[#1B2430] font-medium rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-600"
                 >
                   {copiedLink ? (
                     <>
@@ -579,7 +579,7 @@ function SellFlowForm() {
                 <button
                   type="button"
                   onClick={handleShareWhatsApp}
-                  className="min-h-[48px] px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors border border-emerald-600 shadow-md"
+                  className="min-h-[48px] px-4 py-2.5 bg-emerald-700 hover:bg-[#1F3A5F] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors border border-emerald-600 shadow-md"
                 >
                   <Share2 className="w-4 h-4" />
                   <span>{t.saveToWhatsAppBtn}</span>
@@ -592,7 +592,7 @@ function SellFlowForm() {
               <button
                 type="button"
                 onClick={() => router.push(`/market/manage/${createdEditToken}`)}
-                className="flex-1 min-h-[48px] px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-900/30"
+                className="flex-1 min-h-[48px] px-4 py-3 bg-[#2E7D32] hover:bg-[#236327] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-900/30"
               >
                 <span>{t.openDashboardBtn}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -600,7 +600,7 @@ function SellFlowForm() {
 
               <Link
                 href="/market"
-                className="min-h-[48px] px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl flex items-center justify-center transition-colors border border-slate-700"
+                className="min-h-[48px] px-4 py-3 bg-[#F5F7FA] hover:bg-slate-700 text-[#1B2430] font-medium rounded-xl flex items-center justify-center transition-colors border border-[#D9DEE5]"
               >
                 {t.browseMarketBtn}
               </Link>
@@ -614,7 +614,7 @@ function SellFlowForm() {
 
 export default function SellPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 text-slate-400 p-8">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F7FA] text-[#5B6675] p-8">Loading...</div>}>
       <SellFlowForm />
     </Suspense>
   );

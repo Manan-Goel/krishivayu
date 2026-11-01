@@ -15,6 +15,7 @@ import {
   Truck,
   Wrench,
   Info,
+  Printer,
 } from 'lucide-react';
 
 interface DetailDrawerProps {
@@ -90,7 +91,7 @@ export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
       <div
         role="dialog"
         aria-labelledby="drawer-title"
-        className="w-full max-w-lg bg-white border-l border-[#D9DEE5] h-full flex flex-col shadow-xl overflow-hidden"
+        className="w-full max-w-lg bg-white border-l print-only-container border-[#D9DEE5] h-full flex flex-col shadow-xl overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#D9DEE5] bg-[#F5F7FA]">
@@ -279,6 +280,16 @@ export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 <span>{copied ? 'Copied Advisory!' : 'Copy Advisory'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-md bg-white border border-[#D9DEE5] hover:bg-slate-50 text-[#1F3A5F] text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#1F3A5F]"
+                title="Print or Save District Action Plan as PDF"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print Plan</span>
               </button>
 
               <button

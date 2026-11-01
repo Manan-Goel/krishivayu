@@ -8,6 +8,7 @@ import { DemoNotice } from '@/components/DemoNotice';
 import { Footer } from '@/components/Footer';
 import type { MatchesApiResponse, DistrictSummary } from '@/types';
 import { getRiskBadgeClasses } from '@/lib/theme';
+import { exportToCsv } from '@/lib/csvExport';
 import {
   Flame,
   AlertTriangle,
@@ -17,6 +18,7 @@ import {
   RefreshCw,
   ChevronRight,
   Database,
+  Download,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -66,6 +68,7 @@ export default function HomePage() {
     };
   }, []);
 
+  
   // Filtered districts
   const filteredDistricts = useMemo(() => {
     if (!data) return [];
@@ -77,6 +80,32 @@ export default function HomePage() {
       return matchesSearch && matchesState;
     });
   }, [data, searchQuery, selectedState]);
+
+  const handleExportDistrictCsv = () => {
+    if (!filteredDistricts.length) return;
+    const headers = [
+      'District Name',
+      'State',
+      'Risk Score',
+      'Risk Level',
+      'Active Fires',
+      'Distance to NCR (km)',
+      'Plume Alignment (%)',
+      'Residue Available (Quintals)',
+    ];
+    const rows = filteredDistricts.map((d) => [
+      d.name,
+      d.state,
+      d.riskScore,
+      d.riskLevel,
+      d.fireCount,
+      d.distanceToDelhiKm,
+      Math.round(d.windAlignment * 100),
+      d.demandSignals?.totalQuintals ?? 0,
+    ]);
+    exportToCsv(`KrishiVayu_District_Risk_${new Date().toISOString().slice(0, 10)}`, headers, rows);
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F7FA] text-[#1B2430]">
@@ -247,6 +276,20 @@ export default function HomePage() {
                   {s === 'ALL' ? 'All Districts' : s}
                 </button>
               ))}
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-[#5B6675] font-medium">
+                Showing {filteredDistricts.length} districts
+              </span>
+              <button
+                type="button"
+                onClick={handleExportDistrictCsv}
+                className="text-xs text-[#1F3A5F] hover:text-[#162C49] font-semibold flex items-center gap-1 hover:underline"
+                title="Export filtered districts to safe CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
             </div>
           </div>
 

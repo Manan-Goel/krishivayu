@@ -81,3 +81,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Print CSS for District Action Plan (R10) */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  header, footer, nav, aside, .no-print, [role="status"] {
+    display: none !important;
+  }
+  .print-only-container {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

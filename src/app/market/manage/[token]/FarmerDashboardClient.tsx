@@ -160,17 +160,17 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
       case 'pickup_scheduled':
         return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/40">Pickup Scheduled</span>;
       case 'collected':
-        return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-500/20 text-slate-400 border border-slate-500/40">Residue Collected</span>;
+        return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-500/20 text-[#5B6675] border border-slate-500/40">Residue Collected</span>;
       case 'withdrawn':
         return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/40">Withdrawn</span>;
       default:
-        return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">{status}</span>;
+        return <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#F5F7FA] text-[#5B6675]">{status}</span>;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F5F7FA] text-[#5B6675] flex items-center justify-center p-4">
         <p>Loading farmer management dashboard...</p>
       </div>
     );
@@ -178,14 +178,14 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
 
   if (error && !listing) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-red-500/30 rounded-2xl p-6 text-center">
+      <div className="min-h-screen bg-[#F5F7FA] text-[#1B2430] flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border border-red-500/30 rounded-2xl p-6 text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-          <h1 className="text-lg font-bold text-white mb-2">Invalid or Expired Link</h1>
-          <p className="text-xs text-slate-400 mb-6">{error}</p>
+          <h1 className="text-lg font-bold text-[#1B2430] mb-2">Invalid or Expired Link</h1>
+          <p className="text-xs text-[#5B6675] mb-6">{error}</p>
           <Link
             href="/market"
-            className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-xl"
+            className="inline-block px-4 py-2 bg-[#2E7D32] hover:bg-[#236327] text-white text-xs font-medium rounded-xl"
           >
             Return to Marketplace
           </Link>
@@ -197,10 +197,10 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
   if (!listing) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F5F7FA] text-[#1B2430] flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
+      <header className="border-b border-[#D9DEE5] bg-white sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 text-emerald-400 font-bold text-lg">
             <span>🌾</span> KrishiVayu
@@ -213,14 +213,14 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopyLink}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl flex items-center gap-1.5 border border-slate-700 min-h-[36px]"
+            className="px-3 py-1.5 bg-[#F5F7FA] hover:bg-slate-700 text-slate-300 text-xs rounded-xl flex items-center gap-1.5 border border-[#D9DEE5] min-h-[36px]"
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedLink ? 'Copied' : 'Copy Link'}</span>
           </button>
           <Link
             href="/market"
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-slate-700 min-h-[36px] flex items-center"
+            className="px-3 py-1.5 bg-[#F5F7FA] hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-[#D9DEE5] min-h-[36px] flex items-center"
           >
             Browse Market
           </Link>
@@ -245,11 +245,11 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
         )}
 
         {/* Listing Overview Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+        <div className="bg-white border border-[#D9DEE5] rounded-2xl p-5 sm:p-6 shadow-xl">
           <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                <h1 className="text-xl sm:text-2xl font-bold text-[#1B2430]">
                   {listing.village}, {listing.district}
                 </h1>
                 {listing.isDemo && (
@@ -258,58 +258,58 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 font-mono">
+              <p className="text-xs text-[#5B6675] mt-0.5 font-mono">
                 Listing ID: {listing.id}
               </p>
             </div>
             {getStatusBadge(listing.status)}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-y border-slate-800/80 my-3 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-y border-[#D9DEE5] my-3 text-xs">
             <div>
-              <span className="text-slate-400 block text-[11px]">Quantity</span>
+              <span className="text-[#5B6675] block text-[11px]">Quantity</span>
               <span className="font-bold text-emerald-400 text-base">{listing.quantityQuintals} Quintals</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Residue Form</span>
-              <span className="font-semibold text-slate-200 text-sm">
+              <span className="text-[#5B6675] block text-[11px]">Residue Form</span>
+              <span className="font-semibold text-[#1B2430] text-sm">
                 {listing.form === 'baled' ? '📦 Baled Bundles' : '🌾 Loose Straw'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Asking Price</span>
-              <span className="font-semibold text-slate-200 text-sm">
+              <span className="text-[#5B6675] block text-[11px]">Asking Price</span>
+              <span className="font-semibold text-[#1B2430] text-sm">
                 {listing.askingPricePerQuintal ? `₹${listing.askingPricePerQuintal} / Qtl` : 'Negotiable'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Availability</span>
-              <span className="font-semibold text-slate-200 text-sm">
+              <span className="text-[#5B6675] block text-[11px]">Availability</span>
+              <span className="font-semibold text-[#1B2430] text-sm">
                 {listing.availability.startDate} to {listing.availability.endDate}
               </span>
             </div>
           </div>
 
           {/* Privacy confirmation badge */}
-          <div className="mt-3 bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 flex items-center justify-between flex-wrap gap-2">
+          <div className="mt-3 bg-[#F5F7FA]/60 border border-[#D9DEE5] rounded-xl p-3 text-xs text-slate-300 flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
-                Registered Phone: <span className="font-mono text-white">{listing.phone || 'None entered'}</span> (Hidden from public)
+                Registered Phone: <span className="font-mono text-[#1B2430]">{listing.phone || 'None entered'}</span> (Hidden from public)
               </span>
             </div>
-            <span className="text-[11px] text-slate-500">Only you have this link</span>
+            <span className="text-[11px] text-[#8892A0]">Only you have this link</span>
           </div>
 
           {/* Lifecycle Action Buttons */}
-          <div className="mt-5 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-5 pt-4 border-t border-[#D9DEE5] flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {listing.status === 'accepted' && (
                 <button
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleLifecycleAction('SCHEDULE_PICKUP')}
-                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors shadow-md min-h-[44px]"
+                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-[#1B2430] text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors shadow-md min-h-[44px]"
                 >
                   <Truck className="w-4 h-4" />
                   <span>Mark Pickup Scheduled</span>
@@ -321,7 +321,7 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleLifecycleAction('CONFIRM_COLLECTED')}
-                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors shadow-md min-h-[44px]"
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-[#1B2430] text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors shadow-md min-h-[44px]"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>Confirm Residue Collected</span>
@@ -349,19 +349,19 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
         {/* Incoming Offers Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-[#1B2430] flex items-center gap-2">
               <Clock className="w-5 h-5 text-cyan-400" />
               <span>Incoming Buyer Offers ({offers.length})</span>
             </h2>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[#5B6675]">
               {listing.status === 'offered' ? 'Review & Accept an offer below' : 'Status: ' + listing.status}
             </span>
           </div>
 
           {offers.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm">
+            <div className="bg-white border border-[#D9DEE5] rounded-2xl p-8 text-center text-[#5B6675] text-sm">
               <p>No offers received yet.</p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-[#8892A0] mt-1">
                 When nearby plants or aggregators review your residue, their bids will appear here automatically.
               </p>
             </div>
@@ -376,15 +376,15 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                     key={offer.id}
                     className={`p-5 rounded-2xl border transition-all ${
                       isAccepted
-                        ? 'bg-slate-900 border-amber-500 ring-2 ring-amber-500/30 shadow-xl'
-                        : 'bg-slate-900 border-slate-800'
+                        ? 'bg-white border-amber-500 ring-2 ring-amber-500/30 shadow-xl'
+                        : 'bg-white border-[#D9DEE5]'
                     }`}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-white">{offer.buyerName}</h3>
-                          <span className="text-[10px] uppercase font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+                          <h3 className="text-base font-bold text-[#1B2430]">{offer.buyerName}</h3>
+                          <span className="text-[10px] uppercase font-semibold bg-[#F5F7FA] text-slate-300 px-2 py-0.5 rounded">
                             {offer.buyerType.replace('_', ' ')}
                           </span>
                           {offer.isDemo && (
@@ -393,25 +393,25 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Proposed Pickup Date: <span className="font-medium text-slate-200">{offer.proposedPickupDate}</span>
+                        <p className="text-xs text-[#5B6675] mt-1">
+                          Proposed Pickup Date: <span className="font-medium text-[#1B2430]">{offer.proposedPickupDate}</span>
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <span className="text-xs text-slate-400 block">Offer Rate</span>
+                        <span className="text-xs text-[#5B6675] block">Offer Rate</span>
                         <span className="text-xl font-extrabold text-emerald-400">
                           ₹{offer.pricePerQuintal}
-                          <span className="text-xs font-normal text-slate-400"> / Qtl</span>
+                          <span className="text-xs font-normal text-[#5B6675]"> / Qtl</span>
                         </span>
-                        <span className="block text-[11px] text-slate-400">
+                        <span className="block text-[11px] text-[#5B6675]">
                           Total Value: ~₹{totalEarning.toLocaleString('en-IN')}
                         </span>
                       </div>
                     </div>
 
                     {offer.shortNote && (
-                      <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 mb-3 italic">
+                      <div className="bg-[#F5F7FA]/60 border border-[#D9DEE5] rounded-xl p-3 text-xs text-slate-300 mb-3 italic">
                         &ldquo;{offer.shortNote}&rdquo;
                       </div>
                     )}
@@ -423,7 +423,7 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                           <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
                           <span>
                             Buyer Contact Unlocked:{' '}
-                            <strong className="font-mono text-white text-sm">
+                            <strong className="font-mono text-[#1B2430] text-sm">
                               {offer.buyerContact || '98111-DEMO1'}
                             </strong>{' '}
                             (Demo Synthetic Account)
@@ -432,15 +432,15 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
 
                         <a
                           href={`tel:${offer.buyerContact || '9811100000'}`}
-                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors min-h-[40px]"
+                          className="px-3.5 py-2 bg-[#2E7D32] hover:bg-[#236327] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors min-h-[40px]"
                         >
                           <Phone className="w-3.5 h-3.5" />
                           <span>Call Buyer</span>
                         </a>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-                        <span className="text-xs text-slate-500 capitalize">
+                      <div className="flex items-center justify-between pt-2 border-t border-[#D9DEE5]">
+                        <span className="text-xs text-[#8892A0] capitalize">
                           Status: {offer.status}
                         </span>
 
@@ -458,7 +458,7 @@ export default function FarmerDashboardClient({ token }: FarmerDashboardClientPr
                               type="button"
                               disabled={actionLoading}
                               onClick={() => handleOfferAction(offer.id, 'accept')}
-                              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors shadow-md min-h-[40px]"
+                              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-[#1B2430] text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors shadow-md min-h-[40px]"
                             >
                               <Check className="w-3.5 h-3.5" />
                               <span>Accept Offer</span>

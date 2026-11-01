@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import type { DistrictSummary } from '@/types';
 import { generateFarmerMessages } from '@/lib/messages';
 import {
@@ -175,6 +176,32 @@ export function DetailDrawer({ district, onClose }: DetailDrawerProps) {
               <b>Heuristic Weighting:</b> 40% Fire Density + 30% Proximity (50–450 km scale) + 30% Downwind Plume Trajectory.
             </div>
           </div>
+
+{/* Demand Signal from Marketplace */}
+          {district.demandSignals && district.demandSignals.count > 0 && (
+            <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2.5">
+              <span className="text-base">📢</span>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                    Farmer Supply Demand Signal
+                  </span>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-semibold">
+                    {district.demandSignals.count} Active Listing{district.demandSignals.count > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-100/90 mt-1">
+                  <b>{district.demandSignals.totalQuintals.toLocaleString()} Quintals</b> of paddy straw listed by local farmers in {district.name} awaiting buyer off-take.
+                </p>
+                <div className="mt-2 flex items-center justify-between text-[11px]">
+                  <span className="text-amber-200/60">Zero personal data · Aggregated capacity indicator</span>
+                  <Link href={`/market?district=${encodeURIComponent(district.name)}`} className="text-amber-300 hover:text-white font-medium underline">
+                    Browse Listings →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Matched Alternatives Section */}
           <div className="flex flex-col gap-3">

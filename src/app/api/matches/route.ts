@@ -10,6 +10,7 @@ import { distanceToDelhiKm, bearingToDelhiDeg, haversineDistanceKm } from '@/lib
 import { windAlignment, calculateRiskScore } from '@/lib/risk';
 import { getRegionalWind } from '@/lib/weather';
 import { findNearestAlternativesPerType } from '@/lib/alternatives';
+import { marketRepo } from '@/lib/repo/marketRepo';
 
 interface DistrictRaw {
   lat: number;
@@ -175,7 +176,15 @@ export async function GET(req: Request) {
 
     const nearestAlternatives = findNearestAlternativesPerType(agg.lat, agg.lon);
 
+    const openListings = await marketRepo.listListings({ district: agg.name });
+    const unsoldListings = openListings.filter((l) => l.status === 'listed');
+    const demandSignals = {
+      count: unsoldListings.length,
+      totalQuintals: unsoldListings.reduce((sum, l) => sum + l.quantityQuintals, 0),
+    };
+
     districtSummaries.push({
+      demandSignals,
       districtKey: agg.key,
       name: agg.name,
       state: agg.state,

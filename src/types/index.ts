@@ -63,6 +63,10 @@ export interface DistrictSummary {
   riskScore: number; // 0..100 heuristic
   riskLevel: RiskLevel;
   matchedAlternatives: MatchedAlternative[];
+  demandSignals?: {
+    count: number;
+    totalQuintals: number;
+  };
 }
 
 export interface WindData {

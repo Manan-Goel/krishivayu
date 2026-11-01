@@ -1,8 +1,10 @@
-# KrishiVayu (कृषिवायु) — Burn Alert to Buyer Match
+# KrishiVayu (कृषिवायु) — Burn Alert to Buyer Match & Residue Market
 
-> **One-liner:** Detect crop-residue fires in Punjab/Haryana, rank districts by risk to Delhi air quality, and match each hotspot to the nearest non-burning alternative (residue buyer, biomass/CBG plant, machinery rental), producing a ready-to-send farmer advisory in English, Hindi, and Punjabi.
+> **One-liner:** Detect crop-residue fires in Punjab/Haryana, rank districts by risk to Delhi air quality, match hotspots to clean alternatives, and connect farmers with industrial residue off-takers through a privacy-first, trilingual paddy straw marketplace.
 >
-> **Track:** Green Tech / Sustainable Development · Hackathon MVP
+> **Track:** Green Tech / Sustainable Development · Civic Tech MVP
+>
+> **Live Deployment:** [https://krishivayu-dw9o.vercel.app/](https://krishivayu-dw9o.vercel.app/)
 
 ---
 
@@ -12,29 +14,40 @@ Every October and November, smoke from agricultural stubble burning (*parali*) i
 
 Existing interventions fail because:
 1. **Satellite Gaps**: Polar-orbiting satellites (VIIRS and MODIS) pass at fixed times (10:30 AM & 1:30 PM). Many fires are lit in the late afternoon after satellites have passed.
-2. **Alerts Without Actions**: Telling authorities or farmers that a fire is burning does not solve the root cause. Farmers face a tight 15–20 day window to prepare fields for the wheat crop and lack immediate, verified contacts for clean alternatives.
+2. **Alerts Without Actions**: Telling authorities or farmers that a fire is burning does not solve the root cause. Farmers face a tight 15–20 day window to prepare fields for the wheat crop and lack immediate, verified economic off-takers for their straw.
 3. **Missing Downwind Risk Priority**: An active burn 100 km upwind of Delhi with winds blowing toward the capital poses far greater immediate danger than an isolated burn with crosswinds blowing away.
+4. **Market Friction & Privacy Fears**: Farmers fear harassment or cold calls if they publish contact numbers publicly, while biomass pellet plants and CBG plants struggle with fragmented supply chains and unpredictable availability.
 
-**KrishiVayu bridges detection directly to action:**
-`Active Fire Detection → Downwind Delhi Risk Ranking → Clean Alternative Match → Instant Farmer Advisory`
+**KrishiVayu bridges detection directly to economic action:**
+`Active Fire Detection → Downwind Delhi Risk Ranking → WhatsApp Advisory with Deep Link → Farmer Residue Listing → Buyer Offer Matching → Private Unguessable Off-Take Lifecycle`
 
 ---
 
 ## What KrishiVayu Does
 
-- **🔥 Real-Time Hotspot Detection**: Pulls dual-satellite NASA FIRMS thermal hotspots (VIIRS SNPP + NOAA-20 at 375m NRT resolution), filtering out low-confidence anomalies.
-- **💨 Aerodynamic Wind Alignment**: Integrates real-time 10m wind direction and speed from Open-Meteo. Uses a spherical cosine transfer function to compute the exact smoke transport vector heading into Delhi NCR.
-- **📊 Transparent Air-Quality Risk Heuristic (0–100)**: Ranks districts based on:
+### 1. 🔥 Detection & Risk Modeling
+- **Real-Time Hotspot Detection**: Pulls dual-satellite NASA FIRMS thermal hotspots (VIIRS SNPP + NOAA-20 at 375m NRT resolution), filtering out low-confidence anomalies.
+- **Aerodynamic Wind Alignment**: Integrates real-time 10m wind direction and speed from Open-Meteo. Uses a spherical cosine transfer function to compute the exact smoke transport vector heading into Delhi NCR.
+- **Transparent Air-Quality Risk Heuristic (0–100)**: Ranks districts based on:
   - **Fire Volume (40%)**: Normalized active fire count and fire radiative power (FRP).
   - **Proximity to Delhi (30%)**: Geodesic Haversine distance scaled between 50 km and 450 km.
-  - **Wind Trajectory (30%)**: Normalized alignment of the prevailing plume toward Central Delhi (`28.6129° N, 77.2295° E`).
-- **🏭 Nearest Clean Alternatives Match**: Connects each burning district to the nearest:
-  - **CBG Bio-CNG Plant** (SATAT initiative buyback)
-  - **Biomass Pelletizing Plant** (Thermal power plant co-firing)
-  - **Residue Off-Take Aggregator** (Industrial fiber & board procurement)
-  - **Custom Hiring Centre (CHC)** (Subsidized Happy Seeder & Super Seeder rental)
-- **📱 Trilingual Farmer Advisory Generator**: One-click generation of localized SMS / WhatsApp advisories with exact distances, pricing quotes, and contact numbers in **English**, **हिन्दी (Hindi)**, and **ਪੰਜਾਬੀ (Punjabi)**.
-- **🛡️ 100% Venue & Offline Resilience**: Bundled fallback snapshot (`public/data/firms_snapshot.json`) ensures the app functions flawlessly on conference Wi-Fi or with zero external API credentials.
+  - **Wind Trajectory (30%)**: Normalized alignment of prevailing plume toward Central Delhi (`28.6129° N, 77.2295° E`).
+- **Residue Demand Signals**: Aggregates active, uncollected paddy straw supply per district directly into district cards, giving officials and off-takers real-time visibility into harvest readiness.
+
+### 2. 🌾 Farmer-Facing Residue Marketplace (`/market`)
+- **Trilingual Sell Wizard (`/market/sell`)**: Mobile-first 3-step listing flow in **English**, **हिन्दी (Hindi)**, and **ਪੰਜਾਬੀ (Punjabi)**. Automatically pre-fills district and village from WhatsApp advisory deep links (`?district=...&village=...&ref=wa`).
+- **Official Price Benchmarking**: Displays the CPCB/PEDA benchmark guide for ex-situ stubble (₹180–₹220/quintal farmgate) while granting farmers complete flexibility to specify custom asking prices.
+- **Browse & Offer Feed (`/market`)**: Split-screen desktop feed and map synchronization with MapLibre GL. Off-takers can filter by district, straw form (loose, baled, chopped), and minimum quantity, and submit formal purchase offers.
+- **Nearby Clean Alternatives**: Surfaces verified clean alternatives (CBG plants, pellet hubs, CHCs) with geodesic distance calculations and confidence verification tags.
+
+### 3. 🔐 Privacy-Preserving Farmer Dashboard (`/market/manage/[token]`)
+- **Zero Public PII**: Farmer phone numbers are strictly stripped from all public browse APIs and detail views.
+- **Unguessable Management Token**: On listing creation, the farmer receives an unguessable 32-character random access token (`token=...`). The backend stores only a one-way SHA-256 hash (`editTokenHash`).
+- **Gated Contact Reveal**: Farmer and buyer phone numbers are revealed to each other **only** after the farmer reviews and accepts the buyer's offer.
+- **End-to-End Lifecycle State Machine**: Enforces valid lifecycle transitions: `listed` → `offered` → `accepted` → `pickup_scheduled` → `collected` (or `withdrawn`).
+
+### 4. 🔑 Simulated Auth (`/auth`)
+- A zero-friction role switcher allowing judges and users to toggle between **Farmer**, **Buyer / Off-taker**, and **Observer** modes without passwords or credentials.
 
 ---
 
@@ -52,19 +65,21 @@ cd krishivayu
 npm install
 ```
 
-### 2. Environment Setup (Optional for Live NASA Data)
+### 2. Environment Setup
 
-Copy the example environment file:
+Copy the example environment configuration:
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local`:
+Configure `.env.local`:
 ```env
-# NASA FIRMS MAP API Key (Free registration at https://firms.modaps.eosdis.nasa.gov/api/)
+# NASA FIRMS MAP API Key (Optional: defaults to authentic bundled snapshot if unset)
 FIRMS_MAP_KEY=your_key_here
+
+# Public site URL used to construct WhatsApp deep links
+NEXT_PUBLIC_SITE_URL=https://krishivayu-dw9o.vercel.app
 ```
-*(Note: If no key is provided, KrishiVayu automatically falls back to an authenticated recent VIIRS snapshot with a visible badge).*
 
 ### 3. Run Development Server
 
@@ -78,61 +93,88 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 ```bash
 npm test
 ```
-Runs the 4 verified unit and integration test suites:
-- Geodesic benchmarks and bearing calculations
-- Aerodynamic wind alignment and risk heuristic bounds
-- Keyless Open-Meteo live call and neutral fallback path
-- Clean alternatives catalog validation and nearest-neighbor matching
-- Demo resilience and offline snapshot fallback
+Executes all **10 automated unit, integration, and security test suites**:
+1. `domain.test.ts`: Geodesic distance, bearing benchmarks, and aerodynamic wind alignment.
+2. `weather.test.ts`: Live Open-Meteo API ingestion and error fallback paths.
+3. `alternatives.test.ts`: Clean alternatives dataset validation and nearest-neighbor matching.
+4. `resilience.test.ts`: Offline NASA snapshot resilience and risk score stability.
+5. `market.test.ts`: Marketplace contracts, quantity/phone validations, and state machine transition rules.
+6. `repo.test.ts`: In-memory and file persistence round-trips, seed idempotency, and demo flag integrity.
+7. `api-matrix.test.ts`: API security matrix, PII redaction, token-hash authorization, and rate limiting.
+8. `lifecycle.test.ts`: 10-step farmer lifecycle (listing creation, offer receipt, acceptance, contact unlock, pickup, collection).
+9. `whatsapp-integration.test.ts`: Multilingual WhatsApp message templates and deep-link generation.
+10. `demand-signal.test.ts`: District-level demand signal aggregation without PII leaks.
 
 ---
 
-## 90-Second Judge Demo Script
+## End-to-End 2-Minute Demo Script
 
-| Time | Screen / Action | Spoken Script |
+| Step | Action | What to Notice |
 |---|---|---|
-| **0:00 – 0:20** | **Headline Metrics** | *"Every harvest season, northern India suffocates under stubble smoke. But detection alone hasn't stopped it because farmers don't burn out of malice — they burn because they have a 2-week window to clear fields and no instant alternative. This is KrishiVayu: Burn Alert to Buyer Match."* |
-| **0:20 – 0:45** | **Live Map View** | *"On screen, you see our dark-canvas MapLibre dashboard. KrishiVayu ingest active VIIRS 375m fire hotspots and combines them with live Open-Meteo wind vectors. Right now, winds are blowing from the North-West at 11 km/h straight down into Delhi NCR — shown by our target plume receptor."* |
-| **0:45 – 1:10** | **Click High-Risk District (e.g. Karnal or Kaithal)** | *"Instead of just showing red dots, our algorithm ranks every district by threat to Delhi's air. Let's click Karnal. The risk breakdown explains exactly why: 2 fires, 118 km from Delhi, and 98% wind alignment toward NCR."* |
-| **1:10 – 1:30** | **Detail Drawer & Farmer Advisory** | *"Here is the breakthrough: KrishiVayu instantly matches Karnal to the nearest non-burning solutions — a Custom Hiring Centre 22 km away with 15 Super Seeders, and a Biomass hub buyback @ ₹2,200/ton. With one click, it generates a personalized, respectful message in English, Hindi, or Punjabi, ready to send via WhatsApp or SMS. We turn a pollution alert into an economic transaction."* |
+| **1. Threat Ranking** | Open homepage (`/`), view high-risk districts (e.g. Sangrur or Bathinda). | MapLibre wind plume vectors indicate smoke transport trajectory directly into Delhi NCR. |
+| **2. Advisory Generation** | Click on a district card to open the Detail Drawer. | View nearest clean alternatives, local stubble demand signals, and click **Share on WhatsApp**. Pre-fills a trilingual message with a deep link to `/market/sell?district=Sangrur&ref=wa`. |
+| **3. Farmer Sell Flow** | Open the WhatsApp deep link in your browser (`/market/sell`). | Notice pre-filled district/village, language switcher (EN/HI/PA), CPCB/PEDA benchmark indicator (₹180–₹220/qtl), and phone privacy guarantee. Fill out form and submit. |
+| **4. Private Management Link** | Copy the generated private management link from the confirmation screen. | Farmer receives `https://krishivayu-dw9o.vercel.app/market/manage/<32-char-token>`. |
+| **5. Marketplace Browse** | Navigate to `/market`. Notice your newly listed stubble on the feed and map. | Phone number is completely hidden. Real clean facilities appear under *Nearby Clean Alternatives* with verification tags, while demo buyers carry visible `Demo` badges. |
+| **6. Submit an Offer** | Click your listing, fill in buyer name, offer price, and contact in the offer form. | Listing status smoothly transitions from `listed` to `offered`. |
+| **7. Private Acceptance** | Open your private management link saved in Step 4. | Farmer sees the offer. Click **Accept Offer**. The buyer's phone number is unlocked for the farmer, and the farmer's contact is unlocked for the buyer. |
+| **8. Pickup & Collection** | Click **Schedule Pickup**, then **Confirm Collected**. | State transitions to `collected`, and stubble is removed from active market supply. |
 
 ---
 
 ## Project Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                   Next.js 16 App Router                     │
-│  /           Main Dashboard (Map + Ranked List + Drawer)    │
-│  /trends     Historical CREAMS Stubble Burning Analysis     │
-└──────────────┬──────────────────────────────┬───────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Next.js 16 App Router                           │
+│  /           Main Dashboard (Fire Map + Risk Rank + Detail Drawer)     │
+│  /market     Residue Marketplace Feed & Interactive Map                │
+│  /market/sell Mobile-First Trilingual Sell Flow (EN / HI / PA)         │
+│  /market/manage/[token] Farmer Private Dashboard (Token Auth)          │
+│  /auth       Simulated Zero-Password Role Switcher                     │
+│  /trends     Historical ICAR-IARI Stubble Burning Analysis             │
+└──────────────┬──────────────────────────────┬──────────────────────────┘
                │                              │
        GET /api/firms                 GET /api/matches
-  (NASA VIIRS SNPP + NOAA-20)   (Hotspots + Wind + Risk + Match)
+  (NASA VIIRS SNPP + NOAA-20)    (Hotspots + Wind + Risk + Demand Signals)
                │                              │
-       ┌───────┴──────┐               ┌───────┴───────────────┐
-       ▼              ▼               ▼                       ▼
-  Live FIRMS     Fallback       Open-Meteo 10m          Clean Alternatives
-  Area CSV       Snapshot        Wind Service               Catalog
- (15m Cache)   (2026-10-30)       (1h Cache)           (15 Demo Facilities)
+               ▼                              ▼
+     GET & POST /api/market/listings  GET & POST /api/market/offers
+     (Privacy-Masked Browse & Detail) (Offer Ingestion & Transitions)
+               │                              │
+               └──────────────┬───────────────┘
+                              ▼
+                Market Repository Singleton
+        (In-Memory + /tmp Fallback on Vercel Serverless)
 ```
 
 ---
 
-## Honest Heuristic & Data Disclaimers
+## Data Privacy & Security Guarantees
 
-1. **Analytical Heuristic, Not Dispersion Simulation**:
-   The 0–100 air quality risk score is a deterministic, transparent prioritization heuristic (40% fire volume, 30% proximity, 30% wind alignment). It is designed for civic triage and rapid resource allocation, not regulatory atmospheric modeling.
-2. **Synthetic Alternatives Data**:
-   To comply with strict anti-hallucination standards, the alternative facilities (CBG plants, biomass depots, and machinery rental centers) are synthetic benchmark records with authentic coordinates in Punjab and Haryana. Every demo record is explicitly tagged with `isDemo: true` and displays a visible **Demo Data** badge in the interface.
-3. **NASA FIRMS**:
-   Hotspot data is sourced from NASA's Land, Atmosphere Near real-time Capability for EOS (LANCE) / FIRMS using VIIRS 375m NRT products.
+1. **Strict PII Redaction**: Farmer phone numbers are never returned by public browse (`/api/market/listings`) or public detail (`/api/market/listings/[id]`) endpoints before an offer is accepted.
+2. **One-Way Token Hashing**: Management tokens generated during listing creation (`list_tok_...`) are unguessable 32-character cryptographically random strings. Only their SHA-256 hash is stored on disk and in memory.
+3. **Mutual Contact Exchange**: Contact information is mutual and conditional: buyer and farmer phone numbers are only unlocked after the farmer explicitly verifies and accepts the buyer's offer.
+4. **Rate Limiting**: Write endpoints (`POST /api/market/listings`, `POST /api/market/offers`, `PATCH /api/market/*`) are protected by an in-memory sliding window rate limiter (20 requests/minute per client).
+
+---
+
+## Honest Disclaimers & Limitations
+
+1. **No Direct Financial Escrow**:
+   KrishiVayu is a civic-tech discovery and coordination platform. It facilitates price discovery, negotiation, and pickup scheduling; it does not process financial payments, banking transactions, or hold escrow funds.
+2. **Synthetic Demo Buyers vs. Real Alternatives**:
+   Active bidders in the marketplace are synthetic benchmark profiles tagged with `isDemo: true` and display visible **Demo** badges to prevent hallucination. Official clean alternatives (such as Verbio India, SAEL, and Punjab CHCs) are sourced from official state registries and are presented separately under *Nearby Clean Alternatives* with approximate distances and verification prompts.
+3. **Centroid Coordinates**:
+   Districts use approximate geographic centroids for proximity calculation.
+4. **No Automated WhatsApp / SMS Dispatch**:
+   The platform generates authenticated, pre-filled `wa.me` links for user-initiated sharing. It does not spam or automatically dispatch third-party SMS/WhatsApp messages.
 
 ---
 
 ## Attributions & Licenses
 
-- **NASA FIRMS**: Satellite active fire detections courtesy of NASA EOSDIS FIRMS.
+- **NASA FIRMS**: Satellite active fire detections courtesy of NASA EOSDIS FIRMS (VIIRS 375m NRT).
 - **Weather Data**: Open-Meteo keyless weather API under CC-BY 4.0.
 - **Historical Data**: ICAR-IARI Consortium for Research on Agroecosystem Monitoring and Modeling from Space (CREAMS).
 - **Map Tiles**: CARTO Dark Matter vector/raster basemaps © OpenStreetMap contributors, © CARTO.
@@ -141,8 +183,8 @@ Runs the 4 verified unit and integration test suites:
 
 ## Deployment (Vercel Free Tier)
 
-KrishiVayu is built to deploy effortlessly to Vercel's free serverless tier:
-- Zero heavy C++ binaries or ONNX dependencies
-- Sub-minute cold builds
-- Pure TypeScript domain functions with zero external runtime overhead
-- Add `FIRMS_MAP_KEY` in Vercel Project Settings > Environment Variables
+KrishiVayu is continuously deployed on Vercel:
+- Production URL: [https://krishivayu-dw9o.vercel.app/](https://krishivayu-dw9o.vercel.app/)
+- Serverless Node.js runtime with Turbopack build optimization
+- In-memory persistence with `/tmp` filesystem fallback for serverless state continuity
+- Environment variables: `NEXT_PUBLIC_SITE_URL` and `FIRMS_MAP_KEY`
